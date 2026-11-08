@@ -24,9 +24,9 @@
   #photoPreview { display: none; position: absolute; inset: 0; z-index: 2; }
   
   /* 網上參考圖疊影層 & 線稿層 */
-  #refCanvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 3; display: none; opacity: 0.55; }
+  #refCanvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 3; display: none; opacity: 0.55; transition: transform 0.2s; }
   /* 左上角參考小視窗 (畫中畫) */
-  #pipThumb { position: absolute; top: 12px; left: 12px; width: 76px; height: 100px; object-fit: cover; border-radius: 10px; border: 1.5px solid #a8e6cf; z-index: 6; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
+  #pipThumb { position: absolute; top: 12px; left: 12px; width: 76px; height: 100px; object-fit: cover; border-radius: 10px; border: 1.5px solid #a8e6cf; z-index: 6; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.6); transition: transform 0.2s, width 0.2s, height 0.2s; }
 
   svg.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
 
@@ -78,7 +78,7 @@
   <button class="icon-btn" id="backCamBtn" style="display:none;" onclick="exitAlbumMode()">返回相機</button>
   <input type="file" id="refInput" accept="image/*" style="display:none" onchange="loadRefImage(event)">
   <button class="icon-btn highlight" onclick="document.getElementById('refInput').click()">✨ 參考網圖構圖</button>
-  <span class="pose-tip" id="poseTip">對準橫線拍海平線，將人放喺圓框內</span>
+  <span class="pose-tip" id="poseTip">腳底貼底線，頭頂留白一格，手機微傾顯腿長</span>
   <button class="icon-btn" onclick="switchCamera()">翻轉</button>
 </div>
 
@@ -97,6 +97,7 @@
   <div class="ref-floating-bar" id="refToolbar">
     <button class="ref-mode-btn active" id="btnSketch" onclick="setRefMode('sketch')">智能線稿</button>
     <button class="ref-mode-btn" id="btnGhost" onclick="setRefMode('ghost')">半透明疊影</button>
+    <button class="ref-mode-btn" id="btnFlipRef" onclick="flipRefImage()">⇄ 左右反轉</button>
     <button class="ref-mode-btn" onclick="clearRefImage()" style="color:#ff8a80;">清除參考</button>
   </div>
 
@@ -132,30 +133,111 @@
       <svg class="card-icon" viewBox="0 0 60 70"><path d="M30,18 L30,48 M15,33 L45,33" stroke="#a8e6cf" stroke-width="2.5" stroke-linecap="round"/></svg>
       <span class="card-title" style="color:#a8e6cf;">匯入網圖</span>
     </div>
-    <div class="card-item active" onclick="selectGrid('bridgeStand', '對準橫線拍橋面/欄杆，人物企喺框中間', this)">
+
+    <!-- 1. 大長腿全身 (新增) -->
+    <div class="card-item active" onclick="selectGrid('fullLongLegs', '腳底貼齊底線，頭頂留白一格，手機微向後傾顯腿長', this)">
+      <svg class="card-icon" viewBox="0 0 60 70">
+        <line x1="0" y1="22" x2="60" y2="22" stroke="#666" stroke-width="1" stroke-dasharray="2,2"/>
+        <line x1="0" y1="62" x2="60" y2="62" stroke="#a8e6cf" stroke-width="1.5"/>
+        <circle cx="30" cy="28" r="3.5" fill="#fff"/>
+        <path d="M26,33 L34,33 L36,62 L32,62 L30,46 L28,62 L24,62 Z" fill="#fff"/>
+      </svg>
+      <span class="card-title">大長腿全身</span>
+    </div>
+
+    <!-- 2. 河畔全身 -->
+    <div class="card-item" onclick="selectGrid('bridgeStand', '對準橫線拍橋面/欄杆，人物企喺框中間', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><line x1="0" y1="22" x2="60" y2="22" stroke="#888" stroke-width="1.5"/><line x1="0" y1="42" x2="60" y2="42" stroke="#888" stroke-width="1.5"/><rect x="20" y="20" width="20" height="44" rx="10" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="30" cy="30" r="3.5" fill="#fff"/><path d="M25,48 L27,35 L33,35 L35,48 Z" fill="#fff"/></svg>
       <span class="card-title">河畔全身</span>
     </div>
+
+    <!-- 3. 三分大景全身 (新增) -->
+    <div class="card-item" onclick="selectGrid('scenicThirds', '地平線對準下橫線，人放右下角，留出大片天空與風景', this)">
+      <svg class="card-icon" viewBox="0 0 60 70">
+        <line x1="0" y1="44" x2="60" y2="44" stroke="#888" stroke-width="1.5"/>
+        <line x1="40" y1="0" x2="40" y2="70" stroke="#666" stroke-width="1" stroke-dasharray="2,2"/>
+        <rect x="33" y="32" width="14" height="28" rx="7" fill="none" stroke="#a8e6cf" stroke-width="1.6"/>
+        <circle cx="40" cy="38" r="2.8" fill="#fff"/>
+        <path d="M36,56 L38,42 L42,42 L44,56 Z" fill="#fff"/>
+      </svg>
+      <span class="card-title">三分大景</span>
+    </div>
+
+    <!-- 4. 對角坐姿 (新增) -->
+    <div class="card-item" onclick="selectGrid('diagSit', '坐喺樓梯/斜坡，頭對右上交點，雙腿順斜線向左下延伸', this)">
+      <svg class="card-icon" viewBox="0 0 60 70">
+        <line x1="8" y1="62" x2="52" y2="16" stroke="#a8e6cf" stroke-width="1.4" stroke-dasharray="3,2"/>
+        <circle cx="38" cy="24" r="3.5" fill="#fff"/>
+        <path d="M35,29 L41,33 L20,58 L15,55 Z" fill="#fff"/>
+      </svg>
+      <span class="card-title">對角坐姿</span>
+    </div>
+
+    <!-- 5. 欄杆坐姿 -->
     <div class="card-item" onclick="selectGrid('bridgeSit', '欄杆對齊斜線，人物坐喺欄杆框內', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><line x1="0" y1="25" x2="60" y2="25" stroke="#888" stroke-width="1.5"/><line x1="0" y1="48" x2="22" y2="34" stroke="#888" stroke-width="1.5"/><rect x="20" y="20" width="22" height="36" rx="11" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="31" cy="29" r="3.5" fill="#fff"/><path d="M25,44 L28,34 L34,34 L36,44 Z" fill="#fff"/></svg>
       <span class="card-title">欄杆坐姿</span>
     </div>
+
+    <!-- 6. 七分街拍 (新增) -->
+    <div class="card-item" onclick="selectGrid('kneesUp', '由膝頭位置切入，頭部對準上橫線，適合邊行邊抓拍', this)">
+      <svg class="card-icon" viewBox="0 0 60 70">
+        <line x1="0" y1="20" x2="60" y2="20" stroke="#888" stroke-width="1.2"/>
+        <rect x="18" y="16" width="24" height="52" rx="12" fill="none" stroke="#a8e6cf" stroke-width="1.6"/>
+        <circle cx="30" cy="25" r="4.2" fill="#fff"/>
+        <path d="M22,68 L25,33 L35,33 L38,68 Z" fill="#fff"/>
+      </svg>
+      <span class="card-title">七分街拍</span>
+    </div>
+
+    <!-- 7. 氣氛半身 -->
     <div class="card-item" onclick="selectGrid('halfBody', '人物放喺中間偏下，頭頂留白拍出建築感', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><line x1="0" y1="20" x2="60" y2="20" stroke="#888" stroke-width="1.5"/><rect x="16" y="26" width="28" height="42" rx="14" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="30" cy="38" r="5" fill="#fff"/><path d="M21,66 Q30,45 39,66 Z" fill="#fff"/></svg>
       <span class="card-title">氣氛半身</span>
     </div>
+
+    <!-- 8. 雙人合照 (新增) -->
+    <div class="card-item" onclick="selectGrid('duoFull', '雙人全身合照，兩人靠近中線一高一低企更自然', this)">
+      <svg class="card-icon" viewBox="0 0 60 70">
+        <line x1="0" y1="62" x2="60" y2="62" stroke="#888" stroke-width="1.2"/>
+        <circle cx="23" cy="26" r="3.2" fill="#fff"/>
+        <path d="M18,60 L20,32 L26,32 L28,60 Z" fill="#fff"/>
+        <circle cx="37" cy="29" r="3" fill="#a8e6cf"/>
+        <path d="M32,60 L34,35 L40,35 L42,60 Z" fill="#a8e6cf"/>
+      </svg>
+      <span class="card-title">雙人全身</span>
+    </div>
+
+    <!-- 9. Cafe 俯拍 -->
     <div class="card-item" onclick="selectGrid('cafe', '手機微傾對準虛線，主體擺喺綠圈入面', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><rect x="16" y="16" width="28" height="38" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,2"/><circle cx="30" cy="32" r="9" fill="none" stroke="#a8e6cf" stroke-width="1.8"/></svg>
       <span class="card-title">Cafe 俯拍</span>
     </div>
+
+    <!-- 10. 街拍透視 -->
     <div class="card-item" onclick="selectGrid('perspective', '道路/走廊對準斜虛線，人企喺中心圓圈', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><line x1="30" y1="26" x2="4" y2="66" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,2"/><line x1="30" y1="26" x2="56" y2="66" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,2"/><circle cx="30" cy="36" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.8"/></svg>
       <span class="card-title">街拍透視</span>
     </div>
-    <div class="card-item" onclick="selectGrid('thirds', '經典三分法構圖，將主體放喺交叉點上', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="20" y1="5" x2="20" y2="65" stroke="#888" stroke-width="1.2"/><line x1="40" y1="5" x2="40" y2="65" stroke="#888" stroke-width="1.2"/><line x1="5" y1="25" x2="55" y2="25" stroke="#888" stroke-width="1.2"/><line x1="5" y1="45" x2="55" y2="45" stroke="#888" stroke-width="1.2"/></svg>
+
+    <!-- 11. 九宮格 (連焦點標記) -->
+    <div class="card-item" onclick="selectGrid('thirds', '經典三分法九宮格，將人物眼部或主體對準綠點交叉位', this)">
+      <svg class="card-icon" viewBox="0 0 60 70"><line x1="20" y1="5" x2="20" y2="65" stroke="#888" stroke-width="1.2"/><line x1="40" y1="5" x2="40" y2="65" stroke="#888" stroke-width="1.2"/><line x1="5" y1="25" x2="55" y2="25" stroke="#888" stroke-width="1.2"/><line x1="5" y1="45" x2="55" y2="45" stroke="#888" stroke-width="1.2"/><circle cx="20" cy="25" r="2" fill="#a8e6cf"/><circle cx="40" cy="25" r="2" fill="#a8e6cf"/><circle cx="20" cy="45" r="2" fill="#a8e6cf"/><circle cx="40" cy="45" r="2" fill="#a8e6cf"/></svg>
       <span class="card-title">九宮格</span>
     </div>
+
+    <!-- 12. 黃金對角格 (新增) -->
+    <div class="card-item" onclick="selectGrid('goldenGrid', '中心十字＋對角導引線，適合對稱建築、鳥居或動態構圖', this)">
+      <svg class="card-icon" viewBox="0 0 60 70">
+        <line x1="30" y1="5" x2="30" y2="65" stroke="#888" stroke-width="1.2"/>
+        <line x1="5" y1="35" x2="55" y2="35" stroke="#888" stroke-width="1.2"/>
+        <line x1="5" y1="5" x2="55" y2="65" stroke="#a8e6cf" stroke-width="1" stroke-dasharray="2,2"/>
+        <line x1="55" y1="5" x2="5" y2="65" stroke="#a8e6cf" stroke-width="1" stroke-dasharray="2,2"/>
+      </svg>
+      <span class="card-title">對角十字</span>
+    </div>
+
+    <!-- 無構圖 -->
     <div class="card-item" onclick="selectGrid('none', '關閉預設構圖線', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><circle cx="30" cy="35" r="12" fill="none" stroke="#666" stroke-width="1.5"/><line x1="21" y1="26" x2="39" y2="44" stroke="#666" stroke-width="1.5"/></svg>
       <span class="card-title">無構圖</span>
@@ -230,6 +312,7 @@ let currentZoom = 1;
 let isAlbumMode = false;
 let loadedRefImg = null;
 let refMode = 'sketch'; // 'sketch' (智能線稿) 或 'ghost' (半透明疊影)
+let isRefFlipped = false;
 
 // 濾鏡參數
 const filterDefs = {
@@ -241,10 +324,32 @@ const filterDefs = {
   bw:     { c: 1.25, b: 0.98, s: 1,    sep: 0,    h: 0,  g: 1, name: '黑白' }
 };
 
+// 通用微透明九宮格底線 (令每個全身/半身模板都有格仔對位)
+const baseSubtleGrid = `
+  <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.22)" stroke-width="0.8"/>
+  <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.22)" stroke-width="0.8"/>
+  <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.22)" stroke-width="0.8"/>
+  <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.22)" stroke-width="0.8"/>
+`;
+
 // 預設構圖 SVG
 const grids = {
   none: ``,
-  bridgeStand: `
+
+  // 1. 大長腿全身 (腳貼底線 + 頭頂留白 1/3 + 仰拍延伸感)
+  fullLongLegs: baseSubtleGrid + `
+    <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-dasharray="5,4"/>
+    <line x1="0" y1="374" x2="300" y2="374" stroke="#a8e6cf" stroke-width="1.8"/>
+    <text x="150" y="390" fill="#a8e6cf" font-size="10" text-anchor="middle" opacity="0.9">▲ 腳尖貼齊底線 ▲</text>
+    <line x1="95" y1="133" x2="65" y2="374" stroke="rgba(168,230,207,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="205" y1="133" x2="235" y2="374" stroke="rgba(168,230,207,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+    <rect x="102" y="133" width="96" height="241" rx="42" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+    <circle cx="150" cy="162" r="14" fill="rgba(255,255,255,0.25)" stroke="#a8e6cf" stroke-width="1.5"/>
+    <path d="M130,185 C132,180 168,180 170,185 L176,255 L166,372 L154,372 L150,275 L146,372 L134,372 L124,255 Z" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.75)" stroke-width="1.2"/>
+  `,
+
+  // 2. 河畔全身
+  bridgeStand: baseSubtleGrid + `
     <line x1="0" y1="110" x2="300" y2="110" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
     <line x1="0" y1="215" x2="300" y2="215" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
     <line x1="0" y1="248" x2="300" y2="248" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
@@ -252,18 +357,63 @@ const grids = {
     <circle cx="150" cy="148" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
     <path d="M132,232 C132,175 168,175 168,232 L160,315 L140,315 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
     <circle cx="150" cy="195" r="3" fill="#a8e6cf"/>`,
-  bridgeSit: `
+
+  // 3. 三分大景全身 (人放右下角，上方 2/3 風景留白)
+  scenicThirds: baseSubtleGrid + `
+    <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
+    <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-dasharray="5,4"/>
+    <rect x="166" y="185" width="68" height="170" rx="28" fill="none" stroke="#a8e6cf" stroke-width="1.6"/>
+    <circle cx="200" cy="212" r="10" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
+    <path d="M184,228 C184,224 216,224 216,228 L220,285 L210,348 L190,348 L180,285 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.75)" stroke-width="1.2"/>
+    <circle cx="200" cy="266" r="4" fill="#a8e6cf"/>
+  `,
+
+  // 4. 對角坐姿 (樓梯 / 斜坡延伸長腿)
+  diagSit: baseSubtleGrid + `
+    <line x1="25" y1="365" x2="275" y2="95" stroke="#a8e6cf" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.55)" stroke-width="1.2"/>
+    <circle cx="195" cy="145" r="13" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.5"/>
+    <path d="M182,165 C195,162 215,172 212,195 L185,245 L95,335 L82,322 L158,230 L172,185 Z" fill="rgba(255,255,255,0.24)" stroke="rgba(255,255,255,0.8)" stroke-width="1.3"/>
+    <circle cx="200" cy="133" r="4" fill="#a8e6cf"/>
+  `,
+
+  // 5. 欄杆坐姿
+  bridgeSit: baseSubtleGrid + `
     <line x1="0" y1="120" x2="300" y2="120" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
     <line x1="0" y1="195" x2="300" y2="195" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
     <line x1="0" y1="275" x2="112" y2="195" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
     <rect x="112" y="102" width="84" height="175" rx="34" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.6"/>
     <circle cx="154" cy="136" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
     <path d="M134,205 C135,155 173,155 174,205 L164,258 L142,252 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>`,
-  halfBody: `
+
+  // 6. 七分街拍 (膝上切入)
+  kneesUp: baseSubtleGrid + `
+    <line x1="0" y1="115" x2="300" y2="115" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
+    <rect x="92" y="100" width="116" height="295" rx="46" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+    <circle cx="150" cy="142" r="18" fill="rgba(255,255,255,0.25)" stroke="#a8e6cf" stroke-width="1.5"/>
+    <path d="M115,175 C120,168 180,168 185,175 L196,285 L182,395 L118,395 L104,285 Z" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
+  `,
+
+  // 7. 氣氛半身
+  halfBody: baseSubtleGrid + `
     <line x1="0" y1="125" x2="300" y2="125" stroke="rgba(255,255,255,0.55)" stroke-width="1.2"/>
     <rect x="85" y="145" width="130" height="235" rx="50" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.6"/>
     <circle cx="150" cy="205" r="22" fill="rgba(255,255,255,0.22)" stroke="#a8e6cf" stroke-width="1.5"/>
     <path d="M102,380 C105,255 195,255 198,380 Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>`,
+
+  // 8. 雙人全身合照
+  duoFull: baseSubtleGrid + `
+    <line x1="0" y1="368" x2="300" y2="368" stroke="#a8e6cf" stroke-width="1.5"/>
+    <rect x="68" y="120" width="164" height="248" rx="45" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <!-- 左邊人物 -->
+    <circle cx="122" cy="155" r="12" fill="rgba(255,255,255,0.28)" stroke="#fff" stroke-width="1.4"/>
+    <path d="M104,175 L140,175 L144,255 L136,365 L108,365 L100,255 Z" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
+    <!-- 右邊人物 (微側高低錯落) -->
+    <circle cx="178" cy="166" r="11.5" fill="rgba(168,230,207,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
+    <path d="M160,185 L194,185 L198,260 L190,365 L164,365 L156,260 Z" fill="rgba(168,230,207,0.18)" stroke="#a8e6cf" stroke-width="1.2"/>
+  `,
+
+  // 9. Cafe 俯拍
   cafe: `
     <line x1="80" y1="0" x2="80" y2="400" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
     <line x1="220" y1="0" x2="220" y2="400" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
@@ -273,17 +423,34 @@ const grids = {
     <line x1="300" y1="120" x2="150" y2="55" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="4,4"/>
     <rect x="105" y="135" width="90" height="125" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.2" stroke-dasharray="5,4"/>
     <circle cx="150" cy="175" r="38" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`,
-  perspective: `
+
+  // 10. 街拍透視
+  perspective: baseSubtleGrid + `
     <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
     <line x1="0" y1="245" x2="300" y2="245" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
     <line x1="150" y1="180" x2="0" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
     <line x1="150" y1="180" x2="300" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
     <circle cx="150" cy="215" r="24" fill="rgba(255,255,255,0.15)" stroke="#a8e6cf" stroke-width="1.5"/>`,
+
+  // 11. 九宮格 (連 4 個黃金交叉點)
   thirds: `
-    <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>`
+    <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
+    <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
+    <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
+    <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
+    <circle cx="100" cy="133" r="4.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
+    <circle cx="200" cy="133" r="4.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
+    <circle cx="100" cy="266" r="4.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
+    <circle cx="200" cy="266" r="4.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`,
+
+  // 12. 對角十字格 (對稱 + 對角線)
+  goldenGrid: baseSubtleGrid + `
+    <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
+    <line x1="0" y1="200" x2="300" y2="200" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
+    <line x1="0" y1="0" x2="300" y2="400" stroke="rgba(168,230,207,0.65)" stroke-width="1.1" stroke-dasharray="5,5"/>
+    <line x1="300" y1="0" x2="0" y2="400" stroke="rgba(168,230,207,0.65)" stroke-width="1.1" stroke-dasharray="5,5"/>
+    <circle cx="150" cy="200" r="16" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
+  `
 };
 
 // 匯入網上參考相片並自動提取構圖線 (Sobel 邊緣檢測演算法)
@@ -294,17 +461,28 @@ function loadRefImage(e) {
   const img = new Image();
   img.onload = () => {
     loadedRefImg = img;
+    isRefFlipped = false;
+    refCanvas.style.transform = 'scaleX(1)';
+    pipThumb.style.transform = 'scaleX(1)';
     pipThumb.src = url;
     pipThumb.style.display = 'block';
     refCanvas.style.display = 'block';
     document.getElementById('refToolbar').style.display = 'flex';
     document.getElementById('refSliderRow').classList.add('show');
-    // 自動隱藏預設 SVG 線，改用網圖專屬線稿
-    gridOverlay.innerHTML = '';
-    document.getElementById('poseTip').innerText = '已提取網圖構圖！可切換「智能線稿」或「半透明疊影」';
+    // 保留微透明九宮格底線方便對位
+    gridOverlay.innerHTML = baseSubtleGrid;
+    document.getElementById('poseTip').innerText = '已提取網圖構圖！可切換「智能線稿」、「疊影」或「左右反轉」';
     renderRefOverlay();
   };
   img.src = url;
+}
+
+function flipRefImage() {
+  isRefFlipped = !isRefFlipped;
+  const scale = isRefFlipped ? 'scaleX(-1)' : 'scaleX(1)';
+  refCanvas.style.transform = scale;
+  pipThumb.style.transform = scale;
+  document.getElementById('btnFlipRef').classList.toggle('active', isRefFlipped);
 }
 
 function renderRefOverlay() {
@@ -352,7 +530,6 @@ function renderRefOverlay() {
       const mag = Math.sqrt(gx * gx + gy * gy);
       const p = idx * 4;
       if (mag > 65) {
-        // 發光青綠色構圖線 (#a8e6cf)
         dst[p] = 168;
         dst[p + 1] = 230;
         dst[p + 2] = 207;
@@ -381,12 +558,14 @@ function updateRefOpacity() {
 
 function clearRefImage() {
   loadedRefImg = null;
+  isRefFlipped = false;
   refCanvas.style.display = 'none';
   pipThumb.style.display = 'none';
   document.getElementById('refToolbar').style.display = 'none';
   document.getElementById('refSliderRow').classList.remove('show');
-  gridOverlay.innerHTML = grids.bridgeStand;
-  document.getElementById('poseTip').innerText = '對準橫線拍橋面/欄杆，人物企喺框中間';
+  document.getElementById('btnFlipRef').classList.remove('active');
+  gridOverlay.innerHTML = grids.fullLongLegs;
+  document.getElementById('poseTip').innerText = '腳底貼齊底線，頭頂留白一格，手機微向後傾顯腿長';
 }
 
 function togglePipSize() {
@@ -521,7 +700,7 @@ async function captureOrSave() {
   }, 'image/jpeg', 0.95);
 }
 
-gridOverlay.innerHTML = grids.bridgeStand;
+gridOverlay.innerHTML = grids.fullLongLegs;
 updateFilterCSS();
 initCamera();
 </script>
