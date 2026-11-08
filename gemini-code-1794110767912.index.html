@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="質感相機">
+<title>質感構圖相機</title>
+<style>
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  body { margin: 0; background: #0d0d0d; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+  
+  /* 頂部工具列 */
+  .top-bar { display: flex; justify-content: space-between; align-items: center; padding: max(env(safe-area-inset-top), 14px) 20px 10px; background: #0d0d0d; z-index: 10; }
+  .icon-btn { background: #222; color: #fff; border: 1px solid #333; padding: 7px 14px; border-radius: 18px; font-size: 13px; cursor: pointer; }
+  .icon-btn:active { background: #444; }
+
+  /* 觀景窗與構圖層 */
+  #viewfinder { position: relative; flex: 1; margin: 0 10px; border-radius: 22px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; }
+  video, #photoPreview { width: 100%; height: 100%; object-fit: cover; }
+  #photoPreview { display: none; position: absolute; inset: 0; z-index: 2; }
+  svg.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+
+  /* 底部控制區 */
+  .controls { background: #0d0d0d; padding: 12px 16px max(env(safe-area-inset-bottom), 20px); display: flex; flex-direction: column; gap: 12px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; padding: 0 8px; font-size: 12px; color: #aaa; }
+  input[type=range] { flex: 1; accent-color: #a8e6cf; }
+  
+  .selector-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 4px; }
+  .selector-row::-webkit-scrollbar { display: none; }
+  button.pill { flex-shrink: 0; background: #1f1f1f; color: #ccc; border: 1px solid #333; padding: 7px 14px; border-radius: 18px; font-size: 13px; cursor: pointer; }
+  button.pill.active { background: #a8e6cf; color: #111; border-color: #a8e6cf; font-weight: 600; }
+
+  /* 快門列 */
+  .bottom-actions { display: flex; justify-content: space-around; align-items: center; margin-top: 4px; }
+  #shutter { width: 70px; height: 70px; border-radius: 50%; border: 4px solid #fff; background: rgba(255,255,255,0.25); cursor: pointer; position: relative; }
+  #shutter::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: #fff; transition: 0.15s; }
+  #shutter:active::after { transform: scale(0.88); background: #a8e6cf; }
+  .sub-action { width: 80px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button class="icon-btn" id="backCamBtn" style="display:none;" onclick="exitAlbumMode()">返回相機</button>
+  <span style="font-size:14px; font-weight:600; letter-spacing:0.5px;">YOUNG CAM</span>
+  <button class="icon-btn" onclick="switchCamera()">切換鏡頭</button>
+</div>
+
+<div id="viewfinder">
+  <video id="video" autoplay playsinline muted></video>
+  <img id="photoPreview" alt="preview" />
+  <svg id="gridOverlay" class="overlay" viewBox="0 0 300 400" preserveAspectRatio="none"></svg>
+</div>
+
+<div class="controls">
+  <!-- 濾鏡強度拉桿 -->
+  <div class="slider-row">
+    <span>濾鏡強度</span>
+    <input type="range" id="intensity" min="0" max="100" value="100" oninput="updateFilterCSS()">
+    <span id="intensityVal">100%</span>
+  </div>
+
+  <!-- 構圖切換 -->
+  <div class="selector-row" id="gridBtns">
+    <button class="pill active" onclick="setGrid('cafe', this)">Cafe 俯拍</button>
+    <button class="pill" onclick="setGrid('perspective', this)">街道透視</button>
+    <button class="pill" onclick="setGrid('thirds', this)">九宮格</button>
+    <button class="pill" onclick="setGrid('portrait', this)">全身人像</button>
+    <button class="pill" onclick="setGrid('diagonal', this)">對角構圖</button>
+    <button class="pill" onclick="setGrid('none', this)">無參考線</button>
+  </div>
+
+  <!-- 濾鏡切換 -->
+  <div class="selector-row" id="filterBtns">
+    <button class="pill active" onclick="setFilter('film', this)">日系森系</button>
+    <button class="pill" onclick="setFilter('fuji', this)">富士冷調</button>
+    <button class="pill" onclick="setFilter('warm', this)">復古暖陽</button>
+    <button class="pill" onclick="setFilter('cinema', this)">電影暗調</button>
+    <button class="pill" onclick="setFilter('bw', this)">高反差黑白</button>
+    <button class="pill" onclick="setFilter('none', this)">原圖</button>
+  </div>
+
+  <!-- 快門與相簿讀取 -->
+  <div class="bottom-actions">
+    <div class="sub-action">
+      <input type="file" id="albumInput" accept="image/*" style="display:none" onchange="loadFromAlbum(event)">
+      <button class="icon-btn" onclick="document.getElementById('albumInput').click()">相簿執相</button>
+    </div>
+    <button id="shutter" onclick="captureOrSave()"></button>
+    <div class="sub-action">
+      <span id="modeHint" style="font-size:12px; color:#888;">即時拍攝</span>
+    </div>
+  </div>
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+const video = document.getElementById('video');
+const photoPreview = document.getElementById('photoPreview');
+const gridOverlay = document.getElementById('gridOverlay');
+let facingMode = 'environment';
+let currentFilter = 'film';
+let isAlbumMode = false;
+
+// 濾鏡參數定義
+const filterDefs = {
+  none: { c: 1, b: 1, s: 1, sep: 0, h: 0, g: 0 },
+  film: { c: 0.94, b: 1.07, s: 0.88, sep: 0.05, h: -4, g: 0 },
+  fuji: { c: 1.04, b: 1.03, s: 0.92, sep: 0, h: -8, g: 0 },
+  warm: { c: 1.05, b: 1.02, s: 1.15, sep: 0.22, h: 0, g: 0 },
+  cinema: { c: 1.15, b: 0.94, s: 0.85, sep: 0.1, h: -6, g: 0 },
+  bw: { c: 1.25, b: 0.98, s: 1, sep: 0, h: 0, g: 1 }
+};
+
+// 構圖參考線 SVG（仿照 YoungPhoto 實線+虛線+綠點設計）
+const grids = {
+  none: ``,
+  thirds: `
+    <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+    <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+    <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>`,
+  cafe: `
+    <line x1="80" y1="0" x2="80" y2="400" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+    <line x1="220" y1="0" x2="220" y2="400" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+    <line x1="0" y1="120" x2="300" y2="120" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+    <line x1="0" y1="280" x2="300" y2="280" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+    <line x1="0" y1="120" x2="150" y2="55" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="4,4"/>
+    <line x1="300" y1="120" x2="150" y2="55" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="4,4"/>
+    <rect x="105" y="135" width="90" height="125" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.2" stroke-dasharray="5,4"/>
+    <circle cx="150" cy="175" r="38" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`,
+  perspective: `
+    <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
+    <line x1="0" y1="245" x2="300" y2="245" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    <line x1="150" y1="180" x2="0" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
+    <line x1="150" y1="180" x2="300" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
+    <circle cx="150" cy="215" r="24" fill="rgba(255,255,255,0.15)" stroke="#a8e6cf" stroke-width="1.5"/>`,
+  portrait: `
+    <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="0" y1="340" x2="300" y2="340" stroke="#a8e6cf" stroke-width="1.5"/>
+    <circle cx="150" cy="135" r="22" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
+    <rect x="115" y="160" width="70" height="180" rx="20" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.2" stroke-dasharray="5,5"/>`,
+  diagonal: `
+    <line x1="0" y1="0" x2="300" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
+    <line x1="300" y1="0" x2="0" y2="400" stroke="rgba(255,255,255,0.35)" stroke-width="1" stroke-dasharray="5,5"/>
+    <circle cx="150" cy="200" r="8" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`
+};
+
+function getComputedFilterString() {
+  const f = filterDefs[currentFilter];
+  const ratio = document.getElementById('intensity').value / 100;
+  document.getElementById('intensityVal').innerText = Math.round(ratio * 100) + '%';
+  const c = 1 + (f.c - 1) * ratio;
+  const b = 1 + (f.b - 1) * ratio;
+  const s = 1 + (f.s - 1) * ratio;
+  const sep = f.sep * ratio;
+  const h = f.h * ratio;
+  const g = f.g * ratio;
+  return `contrast(${c}) brightness(${b}) saturate(${s}) sepia(${sep}) hue-rotate(${h}deg) grayscale(${g})`;
+}
+
+function updateFilterCSS() {
+  const css = getComputedFilterString();
+  video.style.filter = css;
+  photoPreview.style.filter = css;
+}
+
+function setGrid(type, btn) {
+  gridOverlay.innerHTML = grids[type];
+  document.querySelectorAll('#gridBtns .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setFilter(type, btn) {
+  currentFilter = type;
+  updateFilterCSS();
+  document.querySelectorAll('#filterBtns .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function initCamera() {
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facingMode, width: { ideal: 1920 }, height: { ideal: 1440 } },
+      audio: false
+    });
+    video.srcObject = stream;
+  } catch (err) {
+    alert('請確保使用 HTTPS 網址開啟並允許相機權限：' + err.message);
+  }
+}
+
+function switchCamera() {
+  if (isAlbumMode) exitAlbumMode();
+  facingMode = (facingMode === 'environment') ? 'user' : 'environment';
+  initCamera();
+}
+
+function loadFromAlbum(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  photoPreview.src = url;
+  photoPreview.style.display = 'block';
+  isAlbumMode = true;
+  document.getElementById('backCamBtn').style.display = 'inline-block';
+  document.getElementById('modeHint').innerText = '儲存修圖';
+}
+
+function exitAlbumMode() {
+  photoPreview.style.display = 'none';
+  isAlbumMode = false;
+  document.getElementById('backCamBtn').style.display = 'none';
+  document.getElementById('modeHint').innerText = '即時拍攝';
+}
+
+async function captureOrSave() {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  if (isAlbumMode) {
+    canvas.width = photoPreview.naturalWidth;
+    canvas.height = photoPreview.naturalHeight;
+    ctx.filter = getComputedFilterString();
+    ctx.drawImage(photoPreview, 0, 0, canvas.width, canvas.height);
+  } else {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.filter = getComputedFilterString();
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  }
+
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], `YoungCam_${Date.now()}.jpg`, { type: 'image/jpeg' });
+    // 優先調用 iOS 原生分享選單（可直接揀「儲存影像」落相簿）
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return;
+      } catch (e) {}
+    }
+    // 備用下載方案
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = file.name;
+    a.click();
+  }, 'image/jpeg', 0.95);
+}
+
+setGrid('cafe', document.querySelector('#gridBtns .pill'));
+updateFilterCSS();
+initCamera();
+</script>
+</body>
+</html>
