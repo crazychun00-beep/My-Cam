@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="質感相機">
-<title>YoungPhoto 質感構圖相機</title>
+<meta name="apple-mobile-web-app-title" content="YY photo">
+<title>YY Photo 質感構圖相機</title>
 <style>
   * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
   body { margin: 0; background: #0a0a0a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
@@ -20,7 +20,7 @@
   /* 觀景窗 (3:4 比例容器) */
   #viewfinder { position: relative; flex: 1; margin: 0 8px; border-radius: 20px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; }
   #camWrap { width: 100%; height: 100%; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
-  video, #photoPreview { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s ease-out; transform-origin: center center; }
+  video, #photoPreview { width: 100%; height: 100%; object-fit: cover; transition: transform 0.05s linear; transform-origin: center center; }
   #photoPreview { display: none; position: absolute; inset: 0; z-index: 2; }
   
   /* 網上參考圖疊影層 & 線稿層 */
@@ -104,11 +104,11 @@
   <svg id="gridOverlay" class="overlay" viewBox="0 0 300 400" preserveAspectRatio="none"></svg>
 
   <!-- 1x 2x 3x 4x 焦距切換 -->
-  <div class="zoom-bar">
-    <button class="zoom-btn active" onclick="setZoom(1, this)">1x</button>
-    <button class="zoom-btn" onclick="setZoom(2, this)">2x</button>
-    <button class="zoom-btn" onclick="setZoom(3, this)">3x</button>
-    <button class="zoom-btn" onclick="setZoom(4, this)">4x</button>
+  <!-- 無段式平滑變焦拉桿 (1.0x - 4.0x) -->
+  <div class="zoom-bar" style="width: 68%; max-width: 240px; padding: 6px 14px; align-items: center; gap: 8px;">
+    <span style="font-size: 11px; color: #ccc;">1x</span>
+    <input type="range" id="zoomSlider" min="1" max="4" step="0.05" value="1" oninput="setSmoothZoom(this.value)" style="flex: 1; accent-color: #a8e6cf; height: 4px;">
+    <span id="zoomValText" style="font-size: 11px; color: #a8e6cf; font-weight: 600; min-width: 28px; text-align: right;">1.0x</span>
   </div>
 </div>
 
@@ -574,20 +574,40 @@ function togglePipSize() {
   pipThumb.style.height = isLarge ? '100px' : '185px';
 }
 
-function setZoom(z, btn) {
-  currentZoom = z;
-  video.style.transform = `scale(${z})`;
-  photoPreview.style.transform = `scale(${z})`;
-  document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function setSmoothZoom(val) {
+  currentZoom = parseFloat(val);
+  video.style.transform = `scale(${currentZoom})`;
+  photoPreview.style.transform = `scale(${currentZoom})`;
+  document.getElementById('zoomValText').innerText = currentZoom.toFixed(1) + 'x';
+  document.getElementById('zoomSlider').value = currentZoom;
   try {
     const track = video.srcObject?.getVideoTracks()[0];
     const caps = track?.getCapabilities?.();
     if (caps && caps.zoom) {
-      const targetZoom = Math.min(caps.zoom.max, Math.max(caps.zoom.min, z));
+      const targetZoom = Math.min(caps.zoom.max, Math.max(caps.zoom.min, currentZoom));
       track.applyConstraints({ advanced: [{ zoom: targetZoom }] });
     }
   } catch (e) {}
+}
+
+// 支援喺觀景窗直接用「兩隻手指」慢慢放大縮小
+let startPinchDist = 0;
+let startPinchZoom = 1;
+const vf = document.getElementById('viewfinder');
+vf.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    startPinchDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+    startPinchZoom = currentZoom;
+  }
+}, { passive: true });
+
+vf.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2 && startPinchDist > 0) {
+    const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+    const newZoom = Math.min(4, Math.max(1, startPinchZoom * (dist / startPinchDist)));
+    setSmoothZoom(newZoom);
+  }
+}, { passive: true });
 }
 
 function switchTab(tab) {
@@ -688,15 +708,21 @@ async function captureOrSave() {
   const cropY = (srcH - cropH) / 2;
   ctx.drawImage(source, cropX, cropY, cropW, cropH, 0, 0, srcW, srcH);
 
-  canvas.toBlob(async (blob) => {
-    const file = new File([blob], `YoungCam_${Date.now()}.jpg`, { type: 'image/jpeg' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file] }); return; } catch (e) {}
-    }
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const fileName = `YY_photo_${Date.now()}.jpg`;
+
+    // 1. 唔再彈出 iOS Share 選單，直接觸發背景下載
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = file.name;
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+
+    // 2. 喺右下角顯示最新影嗰張相嘅縮圖（長按縮圖可以直接「加入 iPhone 相片」）
+    const hintBox = document.getElementById('modeHint');
+    hintBox.innerHTML = `<img src="${url}" style="width:44px;height:56px;object-fit:cover;border-radius:8px;border:1.5px solid #a8e6cf;vertical-align:middle;" title="長按加入相片">`;
   }, 'image/jpeg', 0.95);
 }
 
