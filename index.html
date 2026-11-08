@@ -12,24 +12,36 @@
   body { margin: 0; background: #0a0a0a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
   
   /* 頂部工具列 */
-  .top-bar { display: flex; justify-content: space-between; align-items: center; padding: max(env(safe-area-inset-top), 12px) 18px 8px; z-index: 10; }
-  .icon-btn { background: rgba(255,255,255,0.12); color: #fff; border: none; padding: 6px 13px; border-radius: 20px; font-size: 12px; backdrop-filter: blur(8px); cursor: pointer; }
-  .pose-tip { font-size: 12px; color: #a8e6cf; font-weight: 500; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; padding: max(env(safe-area-inset-top), 12px) 14px 8px; z-index: 10; gap: 6px; }
+  .icon-btn { background: rgba(255,255,255,0.14); color: #fff; border: none; padding: 6px 11px; border-radius: 18px; font-size: 11px; backdrop-filter: blur(8px); cursor: pointer; white-space: nowrap; }
+  .icon-btn.highlight { background: rgba(168,230,207,0.22); color: #a8e6cf; border: 1px solid rgba(168,230,207,0.5); }
+  .pose-tip { font-size: 11px; color: #a8e6cf; font-weight: 500; text-align: center; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* 觀景窗 (3:4 比例容器) */
   #viewfinder { position: relative; flex: 1; margin: 0 8px; border-radius: 20px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; }
   #camWrap { width: 100%; height: 100%; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
   video, #photoPreview { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s ease-out; transform-origin: center center; }
   #photoPreview { display: none; position: absolute; inset: 0; z-index: 2; }
-  svg.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+  
+  /* 網上參考圖疊影層 & 線稿層 */
+  #refCanvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 3; display: none; opacity: 0.55; }
+  /* 左上角參考小視窗 (畫中畫) */
+  #pipThumb { position: absolute; top: 12px; left: 12px; width: 76px; height: 100px; object-fit: cover; border-radius: 10px; border: 1.5px solid #a8e6cf; z-index: 6; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
+
+  svg.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
+
+  /* 參考圖專屬控制浮層 */
+  .ref-floating-bar { position: absolute; top: 12px; right: 12px; display: none; flex-direction: column; gap: 6px; z-index: 6; background: rgba(0,0,0,0.6); padding: 6px; border-radius: 14px; backdrop-filter: blur(8px); border: 1px solid #333; }
+  .ref-mode-btn { background: #222; color: #ddd; border: 1px solid #444; border-radius: 10px; padding: 4px 9px; font-size: 11px; cursor: pointer; }
+  .ref-mode-btn.active { background: #a8e6cf; color: #111; border-color: #a8e6cf; font-weight: 600; }
 
   /* 畫面內焦距切換掣 (1x 2x 3x 4x) */
   .zoom-bar { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; background: rgba(0,0,0,0.45); padding: 4px 6px; border-radius: 24px; backdrop-filter: blur(6px); z-index: 5; }
   .zoom-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid transparent; background: transparent; color: #ddd; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .zoom-btn.active { border-color: #a8e6cf; color: #a8e6cf; background: rgba(168,230,207,0.15); transform: scale(1.08); }
 
-  /* 底部控制區 (還原 YoungPhoto 卡片+膠囊切換) */
-  .controls { background: #0a0a0a; padding: 10px 14px max(env(safe-area-inset-bottom), 16px); display: flex; flex-direction: column; gap: 10px; }
+  /* 底部控制區 */
+  .controls { background: #0a0a0a; padding: 10px 14px max(env(safe-area-inset-bottom), 16px); display: flex; flex-direction: column; gap: 9px; }
   
   /* 預覽卡片列 */
   .card-row { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 2px 4px; }
@@ -40,15 +52,15 @@
   .card-title { font-size: 10px; color: #ccc; white-space: nowrap; }
   .card-item.active .card-title { color: #a8e6cf; font-weight: 600; }
 
-  /* 雙膠囊切換列 (構圖 | 濾鏡) */
-  .tab-bar { display: flex; justify-content: center; align-items: center; gap: 12px; }
-  .pill-tab { display: flex; align-items: center; gap: 8px; background: #181818; border: 1px solid #333; padding: 5px 14px; border-radius: 20px; font-size: 12px; color: #aaa; cursor: pointer; }
+  /* 雙膠囊切換列 */
+  .tab-bar { display: flex; justify-content: center; align-items: center; gap: 10px; }
+  .pill-tab { display: flex; align-items: center; gap: 6px; background: #181818; border: 1px solid #333; padding: 5px 13px; border-radius: 20px; font-size: 12px; color: #aaa; cursor: pointer; }
   .pill-tab.active { border-color: #a8e6cf; color: #fff; background: #1f2924; }
   .pill-badge { background: #333; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 10px; }
   .pill-tab.active .pill-badge { background: #a8e6cf; color: #111; font-weight: 700; }
 
-  /* 濾鏡強度拉桿 */
-  .slider-row { display: none; align-items: center; gap: 10px; padding: 0 12px; font-size: 11px; color: #aaa; }
+  /* 拉桿列 */
+  .slider-row { display: none; align-items: center; gap: 10px; padding: 0 10px; font-size: 11px; color: #aaa; }
   .slider-row.show { display: flex; }
   input[type=range] { flex: 1; accent-color: #a8e6cf; height: 4px; }
 
@@ -57,15 +69,17 @@
   #shutter { width: 66px; height: 66px; border-radius: 50%; border: 3.5px solid #fff; background: rgba(255,255,255,0.2); cursor: pointer; position: relative; }
   #shutter::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: #fff; transition: 0.15s; }
   #shutter:active::after { transform: scale(0.86); background: #a8e6cf; }
-  .sub-action { width: 85px; text-align: center; }
+  .sub-action { width: 90px; text-align: center; }
 </style>
 </head>
 <body>
 
 <div class="top-bar">
   <button class="icon-btn" id="backCamBtn" style="display:none;" onclick="exitAlbumMode()">返回相機</button>
+  <input type="file" id="refInput" accept="image/*" style="display:none" onchange="loadRefImage(event)">
+  <button class="icon-btn highlight" onclick="document.getElementById('refInput').click()">✨ 參考網圖構圖</button>
   <span class="pose-tip" id="poseTip">對準橫線拍海平線，將人放喺圓框內</span>
-  <button class="icon-btn" onclick="switchCamera()">翻轉鏡頭</button>
+  <button class="icon-btn" onclick="switchCamera()">翻轉</button>
 </div>
 
 <div id="viewfinder">
@@ -73,6 +87,19 @@
     <video id="video" autoplay playsinline muted></video>
     <img id="photoPreview" alt="preview" />
   </div>
+  
+  <!-- 參考圖自動轉換線稿 / 疊影 Canvas -->
+  <canvas id="refCanvas"></canvas>
+  <!-- 左上角畫中畫原圖參考 -->
+  <img id="pipThumb" alt="參考原圖" onclick="togglePipSize()" />
+
+  <!-- 參考圖模式切換掣 (載入參考圖後出現) -->
+  <div class="ref-floating-bar" id="refToolbar">
+    <button class="ref-mode-btn active" id="btnSketch" onclick="setRefMode('sketch')">智能線稿</button>
+    <button class="ref-mode-btn" id="btnGhost" onclick="setRefMode('ghost')">半透明疊影</button>
+    <button class="ref-mode-btn" onclick="clearRefImage()" style="color:#ff8a80;">清除參考</button>
+  </div>
+
   <svg id="gridOverlay" class="overlay" viewBox="0 0 300 400" preserveAspectRatio="none"></svg>
 
   <!-- 1x 2x 3x 4x 焦距切換 -->
@@ -85,7 +112,14 @@
 </div>
 
 <div class="controls">
-  <!-- 濾鏡強度拉桿 (切換到濾鏡分頁時顯示) -->
+  <!-- 參考圖透明度拉桿 -->
+  <div class="slider-row" id="refSliderRow">
+    <span>參考線透明度</span>
+    <input type="range" id="refOpacity" min="10" max="100" value="65" oninput="updateRefOpacity()">
+    <span id="refOpacityVal">65%</span>
+  </div>
+
+  <!-- 濾鏡強度拉桿 -->
   <div class="slider-row" id="sliderRow">
     <span>濾鏡濃度</span>
     <input type="range" id="intensity" min="0" max="100" value="100" oninput="updateFilterCSS()">
@@ -94,6 +128,10 @@
 
   <!-- 構圖模板卡片列 -->
   <div class="card-row" id="gridCards">
+    <div class="card-item" onclick="document.getElementById('refInput').click()" style="border-style:dashed; border-color:#a8e6cf;">
+      <svg class="card-icon" viewBox="0 0 60 70"><path d="M30,18 L30,48 M15,33 L45,33" stroke="#a8e6cf" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <span class="card-title" style="color:#a8e6cf;">匯入網圖</span>
+    </div>
     <div class="card-item active" onclick="selectGrid('bridgeStand', '對準橫線拍橋面/欄杆，人物企喺框中間', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><line x1="0" y1="22" x2="60" y2="22" stroke="#888" stroke-width="1.5"/><line x1="0" y1="42" x2="60" y2="42" stroke="#888" stroke-width="1.5"/><rect x="20" y="20" width="20" height="44" rx="10" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="30" cy="30" r="3.5" fill="#fff"/><path d="M25,48 L27,35 L33,35 L35,48 Z" fill="#fff"/></svg>
       <span class="card-title">河畔全身</span>
@@ -118,13 +156,13 @@
       <svg class="card-icon" viewBox="0 0 60 70"><line x1="20" y1="5" x2="20" y2="65" stroke="#888" stroke-width="1.2"/><line x1="40" y1="5" x2="40" y2="65" stroke="#888" stroke-width="1.2"/><line x1="5" y1="25" x2="55" y2="25" stroke="#888" stroke-width="1.2"/><line x1="5" y1="45" x2="55" y2="45" stroke="#888" stroke-width="1.2"/></svg>
       <span class="card-title">九宮格</span>
     </div>
-    <div class="card-item" onclick="selectGrid('none', '關閉構圖參考線', this)">
+    <div class="card-item" onclick="selectGrid('none', '關閉預設構圖線', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><circle cx="30" cy="35" r="12" fill="none" stroke="#666" stroke-width="1.5"/><line x1="21" y1="26" x2="39" y2="44" stroke="#666" stroke-width="1.5"/></svg>
       <span class="card-title">無構圖</span>
     </div>
   </div>
 
-  <!-- 濾鏡卡片列 (預設隱藏，撳「濾鏡」膠囊時顯示) -->
+  <!-- 濾鏡卡片列 -->
   <div class="card-row" id="filterCards" style="display:none;">
     <div class="card-item active" onclick="selectFilter('korea', this)">
       <div class="card-icon" style="background:linear-gradient(135deg,#a8c0d8,#d9e4ec);border-radius:8px;"></div>
@@ -152,7 +190,7 @@
     </div>
   </div>
 
-  <!-- 雙膠囊切換列 (構圖 | 濾鏡) -->
+  <!-- 雙膠囊切換列 -->
   <div class="tab-bar">
     <div class="pill-tab active" id="tabGrid" onclick="switchTab('grid')">
       <span>構圖模板</span>
@@ -168,7 +206,7 @@
   <div class="bottom-actions">
     <div class="sub-action">
       <input type="file" id="albumInput" accept="image/*" style="display:none" onchange="loadFromAlbum(event)">
-      <button class="icon-btn" onclick="document.getElementById('albumInput').click()">相簿導航</button>
+      <button class="icon-btn" onclick="document.getElementById('albumInput').click()">相簿執相</button>
     </div>
     <button id="shutter" onclick="captureOrSave()"></button>
     <div class="sub-action">
@@ -183,10 +221,15 @@
 const video = document.getElementById('video');
 const photoPreview = document.getElementById('photoPreview');
 const gridOverlay = document.getElementById('gridOverlay');
+const refCanvas = document.getElementById('refCanvas');
+const pipThumb = document.getElementById('pipThumb');
+
 let facingMode = 'environment';
 let currentFilter = 'korea';
 let currentZoom = 1;
 let isAlbumMode = false;
+let loadedRefImg = null;
+let refMode = 'sketch'; // 'sketch' (智能線稿) 或 'ghost' (半透明疊影)
 
 // 濾鏡參數
 const filterDefs = {
@@ -198,28 +241,22 @@ const filterDefs = {
   bw:     { c: 1.25, b: 0.98, s: 1,    sep: 0,    h: 0,  g: 1, name: '黑白' }
 };
 
-// 構圖 SVG (還原 Threads 貼文入面嘅河畔橋樑全身框、坐欄杆框 + 人像剪影)
+// 預設構圖 SVG
 const grids = {
   none: ``,
   bridgeStand: `
-    <!-- 遠景橋面與欄杆水平線 -->
     <line x1="0" y1="110" x2="300" y2="110" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
     <line x1="0" y1="215" x2="300" y2="215" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
     <line x1="0" y1="248" x2="300" y2="248" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <!-- 圓角人像定位框 -->
     <rect x="112" y="110" width="76" height="225" rx="32" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.6"/>
-    <!-- 企姿人像剪影指引 -->
     <circle cx="150" cy="148" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
     <path d="M132,232 C132,175 168,175 168,232 L160,315 L140,315 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
     <circle cx="150" cy="195" r="3" fill="#a8e6cf"/>`,
   bridgeSit: `
-    <!-- 遠景與欄杆斜線 -->
     <line x1="0" y1="120" x2="300" y2="120" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
     <line x1="0" y1="195" x2="300" y2="195" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
     <line x1="0" y1="275" x2="112" y2="195" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
-    <!-- 圓角坐姿定位框 -->
     <rect x="112" y="102" width="84" height="175" rx="34" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.6"/>
-    <!-- 坐姿人像剪影指引 -->
     <circle cx="154" cy="136" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
     <path d="M134,205 C135,155 173,155 174,205 L164,258 L142,252 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>`,
   halfBody: `
@@ -249,13 +286,121 @@ const grids = {
     <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>`
 };
 
+// 匯入網上參考相片並自動提取構圖線 (Sobel 邊緣檢測演算法)
+function loadRefImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    loadedRefImg = img;
+    pipThumb.src = url;
+    pipThumb.style.display = 'block';
+    refCanvas.style.display = 'block';
+    document.getElementById('refToolbar').style.display = 'flex';
+    document.getElementById('refSliderRow').classList.add('show');
+    // 自動隱藏預設 SVG 線，改用網圖專屬線稿
+    gridOverlay.innerHTML = '';
+    document.getElementById('poseTip').innerText = '已提取網圖構圖！可切換「智能線稿」或「半透明疊影」';
+    renderRefOverlay();
+  };
+  img.src = url;
+}
+
+function renderRefOverlay() {
+  if (!loadedRefImg) return;
+  const w = 360, h = 480;
+  refCanvas.width = w;
+  refCanvas.height = h;
+  const ctx = refCanvas.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+
+  // 置中裁切繪製參考圖
+  const imgRatio = loadedRefImg.width / loadedRefImg.height;
+  const targetRatio = w / h;
+  let sx = 0, sy = 0, sw = loadedRefImg.width, sh = loadedRefImg.height;
+  if (imgRatio > targetRatio) {
+    sw = loadedRefImg.height * targetRatio;
+    sx = (loadedRefImg.width - sw) / 2;
+  } else {
+    sh = loadedRefImg.width / targetRatio;
+    sy = (loadedRefImg.height - sh) / 2;
+  }
+  ctx.drawImage(loadedRefImg, sx, sy, sw, sh, 0, 0, w, h);
+
+  if (refMode === 'ghost') {
+    updateRefOpacity();
+    return;
+  }
+
+  // Sobel 邊緣提取：將網圖轉換為發光青綠色構圖線
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const src = imgData.data;
+  const outData = ctx.createImageData(w, h);
+  const dst = outData.data;
+
+  const gray = new Uint8Array(w * h);
+  for (let i = 0; i < src.length; i += 4) {
+    gray[i >> 2] = 0.299 * src[i] + 0.587 * src[i + 1] + 0.114 * src[i + 2];
+  }
+
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const idx = y * w + x;
+      const gx = -gray[idx - w - 1] + gray[idx - w + 1] - 2 * gray[idx - 1] + 2 * gray[idx + 1] - gray[idx + w - 1] + gray[idx + w + 1];
+      const gy = -gray[idx - w - 1] - 2 * gray[idx - w] - gray[idx - w + 1] + gray[idx + w - 1] + 2 * gray[idx + w] + gray[idx + w + 1];
+      const mag = Math.sqrt(gx * gx + gy * gy);
+      const p = idx * 4;
+      if (mag > 65) {
+        // 發光青綠色構圖線 (#a8e6cf)
+        dst[p] = 168;
+        dst[p + 1] = 230;
+        dst[p + 2] = 207;
+        dst[p + 3] = Math.min(255, mag * 1.8);
+      } else {
+        dst[p + 3] = 0;
+      }
+    }
+  }
+  ctx.putImageData(outData, 0, 0);
+  updateRefOpacity();
+}
+
+function setRefMode(mode) {
+  refMode = mode;
+  document.getElementById('btnSketch').classList.toggle('active', mode === 'sketch');
+  document.getElementById('btnGhost').classList.toggle('active', mode === 'ghost');
+  renderRefOverlay();
+}
+
+function updateRefOpacity() {
+  const val = document.getElementById('refOpacity').value;
+  document.getElementById('refOpacityVal').innerText = val + '%';
+  refCanvas.style.opacity = val / 100;
+}
+
+function clearRefImage() {
+  loadedRefImg = null;
+  refCanvas.style.display = 'none';
+  pipThumb.style.display = 'none';
+  document.getElementById('refToolbar').style.display = 'none';
+  document.getElementById('refSliderRow').classList.remove('show');
+  gridOverlay.innerHTML = grids.bridgeStand;
+  document.getElementById('poseTip').innerText = '對準橫線拍橋面/欄杆，人物企喺框中間';
+}
+
+function togglePipSize() {
+  const isLarge = pipThumb.style.width === '140px';
+  pipThumb.style.width = isLarge ? '76px' : '140px';
+  pipThumb.style.height = isLarge ? '100px' : '185px';
+}
+
 function setZoom(z, btn) {
   currentZoom = z;
   video.style.transform = `scale(${z})`;
   photoPreview.style.transform = `scale(${z})`;
   document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // 嘗試調用硬件變焦 (如瀏覽器支援)
   try {
     const track = video.srcObject?.getVideoTracks()[0];
     const caps = track?.getCapabilities?.();
@@ -281,7 +426,7 @@ function selectGrid(type, tipText, card) {
   const cards = Array.from(document.querySelectorAll('#gridCards .card-item'));
   cards.forEach(c => c.classList.remove('active'));
   card.classList.add('active');
-  document.getElementById('gridBadge').innerText = cards.indexOf(card) + 1;
+  document.getElementById('gridBadge').innerText = cards.indexOf(card);
 }
 
 function selectFilter(type, card) {
@@ -358,7 +503,6 @@ async function captureOrSave() {
   canvas.height = srcH;
   ctx.filter = getComputedFilterString();
 
-  // 根據焦距 (1x~4x) 自動進行中心裁切輸出
   const cropW = srcW / currentZoom;
   const cropH = srcH / currentZoom;
   const cropX = (srcW - cropW) / 2;
