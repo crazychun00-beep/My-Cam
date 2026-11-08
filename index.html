@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="YY photo">
-<title>YY Photo 質感構圖相機</title>
+<title>YY photo</title>
 <style>
   * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
   body { margin: 0; background: #0a0a0a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
@@ -35,10 +35,8 @@
   .ref-mode-btn { background: #222; color: #ddd; border: 1px solid #444; border-radius: 10px; padding: 4px 9px; font-size: 11px; cursor: pointer; }
   .ref-mode-btn.active { background: #a8e6cf; color: #111; border-color: #a8e6cf; font-weight: 600; }
 
-  /* 畫面內焦距切換掣 (1x 2x 3x 4x) */
-  .zoom-bar { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; background: rgba(0,0,0,0.45); padding: 4px 6px; border-radius: 24px; backdrop-filter: blur(6px); z-index: 5; }
-  .zoom-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid transparent; background: transparent; color: #ddd; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .zoom-btn.active { border-color: #a8e6cf; color: #a8e6cf; background: rgba(168,230,207,0.15); transform: scale(1.08); }
+  /* 畫面內無段式焦距拉桿列 */
+  .zoom-bar { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(0,0,0,0.45); padding: 6px 14px; border-radius: 24px; backdrop-filter: blur(6px); z-index: 5; width: 68%; max-width: 240px; align-items: center; }
 
   /* 底部控制區 */
   .controls { background: #0a0a0a; padding: 10px 14px max(env(safe-area-inset-bottom), 16px); display: flex; flex-direction: column; gap: 9px; }
@@ -103,11 +101,10 @@
 
   <svg id="gridOverlay" class="overlay" viewBox="0 0 300 400" preserveAspectRatio="none"></svg>
 
-  <!-- 1x 2x 3x 4x 焦距切換 -->
   <!-- 無段式平滑變焦拉桿 (1.0x - 4.0x) -->
-  <div class="zoom-bar" style="width: 68%; max-width: 240px; padding: 6px 14px; align-items: center; gap: 8px;">
+  <div class="zoom-bar">
     <span style="font-size: 11px; color: #ccc;">1x</span>
-    <input type="range" id="zoomSlider" min="1" max="4" step="0.05" value="1" oninput="setSmoothZoom(this.value)" style="flex: 1; accent-color: #a8e6cf; height: 4px;">
+    <input type="range" id="zoomSlider" min="1" max="4" step="0.05" value="1" oninput="setSmoothZoom(this.value)">
     <span id="zoomValText" style="font-size: 11px; color: #a8e6cf; font-weight: 600; min-width: 28px; text-align: right;">1.0x</span>
   </div>
 </div>
@@ -134,7 +131,7 @@
       <span class="card-title" style="color:#a8e6cf;">匯入網圖</span>
     </div>
 
-    <!-- 1. 大長腿全身 (新增) -->
+    <!-- 1. 大長腿全身 -->
     <div class="card-item active" onclick="selectGrid('fullLongLegs', '腳底貼齊底線，頭頂留白一格，手機微向後傾顯腿長', this)">
       <svg class="card-icon" viewBox="0 0 60 70">
         <line x1="0" y1="22" x2="60" y2="22" stroke="#666" stroke-width="1" stroke-dasharray="2,2"/>
@@ -151,7 +148,7 @@
       <span class="card-title">河畔全身</span>
     </div>
 
-    <!-- 3. 三分大景全身 (新增) -->
+    <!-- 3. 三分大景全身 -->
     <div class="card-item" onclick="selectGrid('scenicThirds', '地平線對準下橫線，人放右下角，留出大片天空與風景', this)">
       <svg class="card-icon" viewBox="0 0 60 70">
         <line x1="0" y1="44" x2="60" y2="44" stroke="#888" stroke-width="1.5"/>
@@ -163,7 +160,7 @@
       <span class="card-title">三分大景</span>
     </div>
 
-    <!-- 4. 對角坐姿 (新增) -->
+    <!-- 4. 對角坐姿 -->
     <div class="card-item" onclick="selectGrid('diagSit', '坐喺樓梯/斜坡，頭對右上交點，雙腿順斜線向左下延伸', this)">
       <svg class="card-icon" viewBox="0 0 60 70">
         <line x1="8" y1="62" x2="52" y2="16" stroke="#a8e6cf" stroke-width="1.4" stroke-dasharray="3,2"/>
@@ -179,7 +176,7 @@
       <span class="card-title">欄杆坐姿</span>
     </div>
 
-    <!-- 6. 七分街拍 (新增) -->
+    <!-- 6. 七分街拍 -->
     <div class="card-item" onclick="selectGrid('kneesUp', '由膝頭位置切入，頭部對準上橫線，適合邊行邊抓拍', this)">
       <svg class="card-icon" viewBox="0 0 60 70">
         <line x1="0" y1="20" x2="60" y2="20" stroke="#888" stroke-width="1.2"/>
@@ -196,7 +193,7 @@
       <span class="card-title">氣氛半身</span>
     </div>
 
-    <!-- 8. 雙人合照 (新增) -->
+    <!-- 8. 雙人合照 -->
     <div class="card-item" onclick="selectGrid('duoFull', '雙人全身合照，兩人靠近中線一高一低企更自然', this)">
       <svg class="card-icon" viewBox="0 0 60 70">
         <line x1="0" y1="62" x2="60" y2="62" stroke="#888" stroke-width="1.2"/>
@@ -220,13 +217,13 @@
       <span class="card-title">街拍透視</span>
     </div>
 
-    <!-- 11. 九宮格 (連焦點標記) -->
+    <!-- 11. 九宮格 -->
     <div class="card-item" onclick="selectGrid('thirds', '經典三分法九宮格，將人物眼部或主體對準綠點交叉位', this)">
       <svg class="card-icon" viewBox="0 0 60 70"><line x1="20" y1="5" x2="20" y2="65" stroke="#888" stroke-width="1.2"/><line x1="40" y1="5" x2="40" y2="65" stroke="#888" stroke-width="1.2"/><line x1="5" y1="25" x2="55" y2="25" stroke="#888" stroke-width="1.2"/><line x1="5" y1="45" x2="55" y2="45" stroke="#888" stroke-width="1.2"/><circle cx="20" cy="25" r="2" fill="#a8e6cf"/><circle cx="40" cy="25" r="2" fill="#a8e6cf"/><circle cx="20" cy="45" r="2" fill="#a8e6cf"/><circle cx="40" cy="45" r="2" fill="#a8e6cf"/></svg>
       <span class="card-title">九宮格</span>
     </div>
 
-    <!-- 12. 黃金對角格 (新增) -->
+    <!-- 12. 黃金對角格 -->
     <div class="card-item" onclick="selectGrid('goldenGrid', '中心十字＋對角導引線，適合對稱建築、鳥居或動態構圖', this)">
       <svg class="card-icon" viewBox="0 0 60 70">
         <line x1="30" y1="5" x2="30" y2="65" stroke="#888" stroke-width="1.2"/>
@@ -311,7 +308,7 @@ let currentFilter = 'korea';
 let currentZoom = 1;
 let isAlbumMode = false;
 let loadedRefImg = null;
-let refMode = 'sketch'; // 'sketch' (智能線稿) 或 'ghost' (半透明疊影)
+let refMode = 'sketch';
 let isRefFlipped = false;
 
 // 濾鏡參數
@@ -324,7 +321,7 @@ const filterDefs = {
   bw:     { c: 1.25, b: 0.98, s: 1,    sep: 0,    h: 0,  g: 1, name: '黑白' }
 };
 
-// 通用微透明九宮格底線 (令每個全身/半身模板都有格仔對位)
+// 通用微透明九宮格底線
 const baseSubtleGrid = `
   <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.22)" stroke-width="0.8"/>
   <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.22)" stroke-width="0.8"/>
@@ -336,7 +333,7 @@ const baseSubtleGrid = `
 const grids = {
   none: ``,
 
-  // 1. 大長腿全身 (腳貼底線 + 頭頂留白 1/3 + 仰拍延伸感)
+  // 1. 大長腿全身
   fullLongLegs: baseSubtleGrid + `
     <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-dasharray="5,4"/>
     <line x1="0" y1="374" x2="300" y2="374" stroke="#a8e6cf" stroke-width="1.8"/>
@@ -358,7 +355,7 @@ const grids = {
     <path d="M132,232 C132,175 168,175 168,232 L160,315 L140,315 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
     <circle cx="150" cy="195" r="3" fill="#a8e6cf"/>`,
 
-  // 3. 三分大景全身 (人放右下角，上方 2/3 風景留白)
+  // 3. 三分大景全身
   scenicThirds: baseSubtleGrid + `
     <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
     <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-dasharray="5,4"/>
@@ -368,7 +365,7 @@ const grids = {
     <circle cx="200" cy="266" r="4" fill="#a8e6cf"/>
   `,
 
-  // 4. 對角坐姿 (樓梯 / 斜坡延伸長腿)
+  // 4. 對角坐姿
   diagSit: baseSubtleGrid + `
     <line x1="25" y1="365" x2="275" y2="95" stroke="#a8e6cf" stroke-width="1.5" stroke-dasharray="6,4"/>
     <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.55)" stroke-width="1.2"/>
@@ -386,7 +383,7 @@ const grids = {
     <circle cx="154" cy="136" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
     <path d="M134,205 C135,155 173,155 174,205 L164,258 L142,252 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>`,
 
-  // 6. 七分街拍 (膝上切入)
+  // 6. 七分街拍
   kneesUp: baseSubtleGrid + `
     <line x1="0" y1="115" x2="300" y2="115" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
     <rect x="92" y="100" width="116" height="295" rx="46" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
@@ -405,10 +402,8 @@ const grids = {
   duoFull: baseSubtleGrid + `
     <line x1="0" y1="368" x2="300" y2="368" stroke="#a8e6cf" stroke-width="1.5"/>
     <rect x="68" y="120" width="164" height="248" rx="45" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-dasharray="6,4"/>
-    <!-- 左邊人物 -->
     <circle cx="122" cy="155" r="12" fill="rgba(255,255,255,0.28)" stroke="#fff" stroke-width="1.4"/>
     <path d="M104,175 L140,175 L144,255 L136,365 L108,365 L100,255 Z" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
-    <!-- 右邊人物 (微側高低錯落) -->
     <circle cx="178" cy="166" r="11.5" fill="rgba(168,230,207,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
     <path d="M160,185 L194,185 L198,260 L190,365 L164,365 L156,260 Z" fill="rgba(168,230,207,0.18)" stroke="#a8e6cf" stroke-width="1.2"/>
   `,
@@ -432,7 +427,7 @@ const grids = {
     <line x1="150" y1="180" x2="300" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
     <circle cx="150" cy="215" r="24" fill="rgba(255,255,255,0.15)" stroke="#a8e6cf" stroke-width="1.5"/>`,
 
-  // 11. 九宮格 (連 4 個黃金交叉點)
+  // 11. 九宮格
   thirds: `
     <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
     <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
@@ -443,7 +438,7 @@ const grids = {
     <circle cx="100" cy="266" r="4.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
     <circle cx="200" cy="266" r="4.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`,
 
-  // 12. 對角十字格 (對稱 + 對角線)
+  // 12. 對角十字格
   goldenGrid: baseSubtleGrid + `
     <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
     <line x1="0" y1="200" x2="300" y2="200" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
@@ -453,7 +448,7 @@ const grids = {
   `
 };
 
-// 匯入網上參考相片並自動提取構圖線 (Sobel 邊緣檢測演算法)
+// 匯入網上參考相片並自動提取構圖線
 function loadRefImage(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -469,7 +464,6 @@ function loadRefImage(e) {
     refCanvas.style.display = 'block';
     document.getElementById('refToolbar').style.display = 'flex';
     document.getElementById('refSliderRow').classList.add('show');
-    // 保留微透明九宮格底線方便對位
     gridOverlay.innerHTML = baseSubtleGrid;
     document.getElementById('poseTip').innerText = '已提取網圖構圖！可切換「智能線稿」、「疊影」或「左右反轉」';
     renderRefOverlay();
@@ -493,7 +487,6 @@ function renderRefOverlay() {
   const ctx = refCanvas.getContext('2d');
   ctx.clearRect(0, 0, w, h);
 
-  // 置中裁切繪製參考圖
   const imgRatio = loadedRefImg.width / loadedRefImg.height;
   const targetRatio = w / h;
   let sx = 0, sy = 0, sw = loadedRefImg.width, sh = loadedRefImg.height;
@@ -511,7 +504,6 @@ function renderRefOverlay() {
     return;
   }
 
-  // Sobel 邊緣提取：將網圖轉換為發光青綠色構圖線
   const imgData = ctx.getImageData(0, 0, w, h);
   const src = imgData.data;
   const outData = ctx.createImageData(w, h);
@@ -590,7 +582,7 @@ function setSmoothZoom(val) {
   } catch (e) {}
 }
 
-// 支援喺觀景窗直接用「兩隻手指」慢慢放大縮小
+// 支援觀景窗雙指無段式縮放
 let startPinchDist = 0;
 let startPinchZoom = 1;
 const vf = document.getElementById('viewfinder');
@@ -609,6 +601,9 @@ vf.addEventListener('touchmove', (e) => {
   }
 }, { passive: true });
 
+vf.addEventListener('touchend', () => {
+  startPinchDist = 0;
+}, { passive: true });
 
 function switchTab(tab) {
   const isGrid = (tab === 'grid');
@@ -712,7 +707,7 @@ async function captureOrSave() {
     const url = URL.createObjectURL(blob);
     const fileName = `YY_photo_${Date.now()}.jpg`;
 
-    // 1. 唔再彈出 iOS Share 選單，直接觸發背景下載
+    // 1. 直接觸發背景下載（唔彈 Share 選單）
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
@@ -720,7 +715,7 @@ async function captureOrSave() {
     a.click();
     document.body.removeChild(a);
 
-    // 2. 喺右下角顯示最新影嗰張相嘅縮圖（長按縮圖可以直接「加入 iPhone 相片」）
+    // 2. 右下角顯示最新相片縮圖（長按縮圖可直接揀「加入相片」入 iPhone 相簿）
     const hintBox = document.getElementById('modeHint');
     hintBox.innerHTML = `<img src="${url}" style="width:44px;height:56px;object-fit:cover;border-radius:8px;border:1.5px solid #a8e6cf;vertical-align:middle;" title="長按加入相片">`;
   }, 'image/jpeg', 0.95);
