@@ -11,12 +11,13 @@
   * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
   body { margin: 0; background: #0a0a0a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
   
-  /* 頂部工具列 (支援點擊展開完整文字) */
-  .top-bar { position: relative; display: flex; justify-content: space-between; align-items: center; padding: max(env(safe-area-inset-top), 10px) 12px 8px; z-index: 20; gap: 8px; }
+  /* 頂部工具列 */
+  .top-bar { position: relative; display: flex; justify-content: space-between; align-items: center; padding: max(env(safe-area-inset-top), 10px) 12px 6px; z-index: 20; gap: 8px; }
   .icon-btn { background: rgba(255,255,255,0.14); color: #fff; border: none; padding: 6px 11px; border-radius: 18px; font-size: 11px; backdrop-filter: blur(8px); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
   .icon-btn.highlight { background: rgba(168,230,207,0.18); color: #a8e6cf; border: 1px solid rgba(168,230,207,0.5); }
+  .icon-btn.cam-front { background: #a8e6cf; color: #111; font-weight: 700; }
   
-  /* 頂部提示字：預設單行，點擊即展開浮層 */
+  /* 頂部提示字：點擊即展開浮層 */
   .pose-tip-wrap { flex: 1; min-width: 0; position: relative; cursor: pointer; background: rgba(255,255,255,0.06); padding: 5px 10px; border-radius: 14px; border: 1px solid rgba(168,230,207,0.25); }
   .pose-tip { font-size: 11px; color: #a8e6cf; font-weight: 500; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
   .pose-tip-wrap.expanded { background: rgba(20,32,28,0.96); border-color: #a8e6cf; position: absolute; left: 12px; right: 12px; top: max(env(safe-area-inset-top), 8px); z-index: 30; padding: 10px 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
@@ -24,7 +25,7 @@
   .tip-close-hint { display: none; font-size: 10px; color: #888; text-align: right; margin-top: 4px; }
   .pose-tip-wrap.expanded .tip-close-hint { display: block; }
 
-  /* 觀景窗 (100% 乾淨無遮擋) */
+  /* 觀景窗 */
   #viewfinder { position: relative; flex: 1; margin: 0 8px; border-radius: 20px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; }
   #camWrap { width: 100%; height: 100%; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
   video, #photoPreview { width: 100%; height: 100%; object-fit: cover; transition: transform 0.1s ease-out; transform-origin: center center; }
@@ -34,33 +35,43 @@
   #pipThumb { position: absolute; top: 12px; left: 12px; width: 72px; height: 96px; object-fit: cover; border-radius: 10px; border: 1.5px solid #a8e6cf; z-index: 6; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
   svg.overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
 
+  /* 鏡頭模式狀態標籤 */
+  .cam-mode-tag { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); color: #a8e6cf; border: 1px solid rgba(168,230,207,0.4); font-size: 10px; padding: 2px 10px; border-radius: 12px; z-index: 5; pointer-events: none; backdrop-filter: blur(4px); }
+
   /* 參考圖控制浮層 */
   .ref-floating-bar { position: absolute; top: 12px; right: 12px; display: none; flex-direction: column; gap: 6px; z-index: 6; background: rgba(0,0,0,0.65); padding: 6px; border-radius: 14px; backdrop-filter: blur(8px); border: 1px solid #333; }
   .ref-mode-btn { background: #222; color: #ddd; border: 1px solid #444; border-radius: 10px; padding: 4px 9px; font-size: 11px; cursor: pointer; }
   .ref-mode-btn.active { background: #a8e6cf; color: #111; border-color: #a8e6cf; font-weight: 600; }
 
   /* 底部控制區 */
-  .controls { background: #0a0a0a; padding: 8px 14px max(env(safe-area-inset-bottom), 14px); display: flex; flex-direction: column; gap: 8px; }
+  .controls { background: #0a0a0a; padding: 6px 12px max(env(safe-area-inset-bottom), 12px); display: flex; flex-direction: column; gap: 6px; }
 
-  /* 獨立變焦拉桿列 */
-  .zoom-control-row { display: flex; align-items: center; gap: 10px; background: #141414; padding: 5px 14px; border-radius: 20px; border: 1px solid #262626; margin: 0 4px; }
-  .zoom-label { font-size: 11px; color: #a8e6cf; font-weight: 600; min-width: 32px; text-align: center; }
-  .zoom-quick-btn { background: #262626; color: #ccc; border: none; border-radius: 10px; padding: 2px 7px; font-size: 10px; cursor: pointer; }
-  .zoom-quick-btn:active { background: #a8e6cf; color: #111; }
+  /* 變焦與人數並排列 */
+  .top-controls-bar { display: flex; align-items: center; gap: 6px; }
+  
+  /* 人數切換膠囊列 (1人 | 2人 | 3人 | 4人+ | 景物) */
+  .people-bar { display: flex; flex: 1.3; background: #141414; padding: 3px; border-radius: 18px; border: 1px solid #282828; justify-content: space-between; }
+  .p-btn { flex: 1; background: transparent; color: #999; border: none; padding: 4px 0; border-radius: 14px; font-size: 11px; font-weight: 500; cursor: pointer; transition: 0.15s; white-space: nowrap; }
+  .p-btn.active { background: #a8e6cf; color: #111; font-weight: 700; }
+
+  /* 精簡變焦列 */
+  .zoom-control-row { display: flex; flex: 1; align-items: center; gap: 6px; background: #141414; padding: 4px 10px; border-radius: 18px; border: 1px solid #282828; }
+  .zoom-label { font-size: 10px; color: #a8e6cf; font-weight: 600; min-width: 26px; text-align: right; }
+  .zoom-quick-btn { background: #262626; color: #ccc; border: none; border-radius: 8px; padding: 2px 6px; font-size: 10px; cursor: pointer; }
 
   /* 預覽卡片列 */
-  .card-row { display: flex; gap: 9px; overflow-x: auto; scrollbar-width: none; padding: 2px 4px; scroll-behavior: smooth; }
+  .card-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 2px; scroll-behavior: smooth; min-height: 74px; }
   .card-row::-webkit-scrollbar { display: none; }
-  .card-item { flex-shrink: 0; width: 66px; height: 74px; border-radius: 12px; background: #161616; border: 1.5px solid #2a2a2a; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 5px 4px; cursor: pointer; position: relative; }
+  .card-item { flex-shrink: 0; width: 66px; height: 72px; border-radius: 12px; background: #161616; border: 1.5px solid #2a2a2a; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 5px 4px; cursor: pointer; position: relative; }
   .card-item.active { border-color: #a8e6cf; background: #18241f; }
-  .card-icon { width: 36px; height: 40px; display: flex; align-items: center; justify-content: center; }
+  .card-icon { width: 36px; height: 38px; display: flex; align-items: center; justify-content: center; }
   .card-title { font-size: 10px; color: #ccc; white-space: nowrap; }
   .card-item.active .card-title { color: #a8e6cf; font-weight: 600; }
-  .selfie-tag { position: absolute; top: 3px; right: 3px; background: #a8e6cf; color: #111; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 6px; }
+  .badge-tag { position: absolute; top: 3px; right: 3px; background: #a8e6cf; color: #111; font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 5px; }
 
   /* 雙膠囊切換列 */
   .tab-bar { display: flex; justify-content: center; align-items: center; gap: 10px; }
-  .pill-tab { display: flex; align-items: center; gap: 6px; background: #181818; border: 1px solid #333; padding: 5px 13px; border-radius: 20px; font-size: 12px; color: #aaa; cursor: pointer; }
+  .pill-tab { display: flex; align-items: center; gap: 6px; background: #181818; border: 1px solid #333; padding: 4px 13px; border-radius: 20px; font-size: 11.5px; color: #aaa; cursor: pointer; }
   .pill-tab.active { border-color: #a8e6cf; color: #fff; background: #1f2924; }
   .pill-badge { background: #333; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 10px; }
   .pill-tab.active .pill-badge { background: #a8e6cf; color: #111; font-weight: 700; }
@@ -71,13 +82,13 @@
   input[type=range] { flex: 1; accent-color: #a8e6cf; height: 4px; }
 
   /* 快門與相簿列 */
-  .bottom-actions { display: flex; justify-content: space-around; align-items: center; margin-top: 2px; }
-  #shutter { width: 64px; height: 64px; border-radius: 50%; border: 3.5px solid #fff; background: rgba(255,255,255,0.2); cursor: pointer; position: relative; }
+  .bottom-actions { display: flex; justify-content: space-around; align-items: center; margin-top: 1px; }
+  #shutter { width: 62px; height: 62px; border-radius: 50%; border: 3.5px solid #fff; background: rgba(255,255,255,0.2); cursor: pointer; position: relative; }
   #shutter::after { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: #fff; transition: 0.15s; }
   #shutter:active::after { transform: scale(0.86); background: #a8e6cf; }
   .sub-action { width: 90px; text-align: center; }
 
-  /* 拍完相彈出「儲存至 iPhone 相簿」預覽視窗 */
+  /* 拍完相彈出預覽視窗 */
   #resultModal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(12px); }
   #resultImg { max-width: 92%; max-height: 68dvh; border-radius: 16px; border: 1.5px solid #333; object-fit: contain; -webkit-touch-callout: default !important; user-select: auto !important; }
   .modal-hint { font-size: 12px; color: #aaa; margin-top: 10px; text-align: center; }
@@ -92,17 +103,18 @@
 <div class="top-bar">
   <button class="icon-btn" id="backCamBtn" style="display:none;" onclick="exitAlbumMode()">返回相機</button>
   <input type="file" id="refInput" accept="image/*" style="display:none" onchange="loadRefImage(event)">
-  <button class="icon-btn highlight" onclick="document.getElementById('refInput').click()">✨ 參考網圖構圖</button>
+  <button class="icon-btn highlight" onclick="document.getElementById('refInput').click()">✨ 網圖構圖</button>
   
   <div class="pose-tip-wrap" id="tipWrap" onclick="toggleTipExpand()">
-    <span class="pose-tip" id="poseTip">【大長腿全身】腳尖貼齊最底綠線，頭頂留白一格，手機微傾立刻拍出逆天長腿！</span>
+    <span class="pose-tip" id="poseTip">載入中...</span>
     <span class="tip-close-hint">▲ 點擊收起提示</span>
   </div>
 
-  <button class="icon-btn" onclick="switchCamera()">翻轉</button>
+  <button class="icon-btn" id="camSwitchBtn" onclick="switchCamera()">翻轉自拍</button>
 </div>
 
 <div id="viewfinder">
+  <div class="cam-mode-tag" id="camModeTag">後鏡拍攝・1人構圖</div>
   <div id="camWrap">
     <video id="video" autoplay playsinline muted></video>
     <img id="photoPreview" alt="preview" />
@@ -121,12 +133,21 @@
 </div>
 
 <div class="controls">
-  <!-- 變焦拉桿 -->
-  <div class="zoom-control-row">
-    <button class="zoom-quick-btn" onclick="setZoomVal(1)">1x</button>
-    <input type="range" id="zoomSlider" min="1" max="4" step="0.1" value="1" oninput="setZoomVal(this.value)">
-    <button class="zoom-quick-btn" onclick="setZoomVal(2)">2x</button>
-    <span class="zoom-label" id="zoomValText">1.0x</span>
+  <!-- 人數選擇器 + 變焦拉桿 -->
+  <div class="top-controls-bar">
+    <div class="people-bar" id="peopleBar">
+      <button class="p-btn active" data-p="1" onclick="setPeopleCount('1')">1人</button>
+      <button class="p-btn" data-p="2" onclick="setPeopleCount('2')">2人</button>
+      <button class="p-btn" data-p="3" onclick="setPeopleCount('3')">3人</button>
+      <button class="p-btn" data-p="4" onclick="setPeopleCount('4')">4人+</button>
+      <button class="p-btn" data-p="scene" id="sceneBtn" onclick="setPeopleCount('scene')">景物</button>
+    </div>
+
+    <div class="zoom-control-row">
+      <button class="zoom-quick-btn" onclick="setZoomVal(1)">1x</button>
+      <input type="range" id="zoomSlider" min="1" max="4" step="0.1" value="1" oninput="setZoomVal(this.value)">
+      <span class="zoom-label" id="zoomValText">1.0x</span>
+    </div>
   </div>
 
   <!-- 參考圖透明度拉桿 -->
@@ -143,100 +164,8 @@
     <span id="intensityVal">100%</span>
   </div>
 
-  <!-- 14 款熱門構圖模板卡片列 -->
-  <div class="card-row" id="gridCards">
-    <div class="card-item" onclick="document.getElementById('refInput').click()" style="border-style:dashed; border-color:#a8e6cf;">
-      <svg class="card-icon" viewBox="0 0 60 70"><path d="M30,18 L30,48 M15,33 L45,33" stroke="#a8e6cf" stroke-width="2.5" stroke-linecap="round"/></svg>
-      <span class="card-title" style="color:#a8e6cf;">匯入網圖</span>
-    </div>
-
-    <!-- 1. 大長腿全身 (後鏡預設) -->
-    <div class="card-item active" data-grid="longLeg" onclick="selectGrid('longLeg', '【大長腿全身】腳尖貼齊最底綠線，頭頂留白一格，手機微傾立刻拍出逆天長腿！', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="0" y1="18" x2="60" y2="18" stroke="#888" stroke-width="1.2" stroke-dasharray="3,2"/><rect x="18" y="20" width="24" height="44" rx="12" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="30" cy="28" r="3.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/><line x1="12" y1="64" x2="48" y2="64" stroke="#a8e6cf" stroke-width="2"/></svg>
-      <span class="card-title">大長腿全身</span>
-    </div>
-
-    <!-- 2. 顯臉細自拍 (轉前鏡頭自動切換呢個) -->
-    <div class="card-item" data-grid="selfieClose" onclick="selectGrid('selfieClose', '【顯臉細自拍】手機舉高少少！眼睛對準綠線，下巴收喺V框內，頭頂留白最顯臉細！', this)">
-      <span class="selfie-tag">自拍</span>
-      <svg class="card-icon" viewBox="0 0 60 70"><ellipse cx="30" cy="30" rx="12" ry="15" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><line x1="20" y1="28" x2="40" y2="28" stroke="#fff" stroke-width="1.2" stroke-dasharray="2,2"/><path d="M12,62 Q30,46 48,62" fill="none" stroke="#fff" stroke-width="1.5"/></svg>
-      <span class="card-title">顯臉細自拍</span>
-    </div>
-
-    <!-- 3. 雙人情侶自拍 -->
-    <div class="card-item" data-grid="selfieCouple" onclick="selectGrid('selfieCouple', '【雙人自拍】兩個人一高一低貼近，靠後嗰位最顯臉細，畫面更有親密層次感！', this)">
-      <span class="selfie-tag">自拍</span>
-      <svg class="card-icon" viewBox="0 0 60 70"><circle cx="23" cy="28" r="9" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><circle cx="38" cy="34" r="8.5" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M10,60 Q23,44 36,60 M26,62 Q38,48 50,62" fill="none" stroke="#888" stroke-width="1.3"/></svg>
-      <span class="card-title">雙人自拍</span>
-    </div>
-
-    <!-- 4. 對鏡穿搭 OOTD -->
-    <div class="card-item" data-grid="mirrorOotd" onclick="selectGrid('mirrorOotd', '【對鏡穿搭】對住全身鏡自拍，手機放喺綠色小框遮半塊面，一隻腳向斜前伸最顯比例！', this)">
-      <span class="selfie-tag">自拍</span>
-      <svg class="card-icon" viewBox="0 0 60 70"><rect x="14" y="8" width="32" height="56" rx="4" fill="none" stroke="#888" stroke-width="1.2"/><rect x="27" y="18" width="7" height="11" rx="1.5" fill="#a8e6cf"/><path d="M22,60 L26,32 L34,32 L38,60" fill="none" stroke="#fff" stroke-width="1.5"/></svg>
-      <span class="card-title">對鏡穿搭</span>
-    </div>
-
-    <!-- 5. 河畔/欄杆全身 -->
-    <div class="card-item" data-grid="bridgeStand" onclick="selectGrid('bridgeStand', '【河畔全身】對準橫線拍橋面或海平線，將人物放喺圓框正中央，背景對稱更好睇。', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="0" y1="22" x2="60" y2="22" stroke="#888" stroke-width="1.5"/><line x1="0" y1="42" x2="60" y2="42" stroke="#888" stroke-width="1.5"/><rect x="20" y="20" width="20" height="44" rx="10" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="30" cy="30" r="3.5" fill="#fff"/></svg>
-      <span class="card-title">河畔全身</span>
-    </div>
-
-    <!-- 6. 斑馬線過馬路街拍 -->
-    <div class="card-item" data-grid="crosswalk" onclick="selectGrid('crosswalk', '【斑馬線街拍】斜角對準馬路斑馬線，開啟連拍捉拍行路邁步瞬間，自然唔尷尬！', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="6" y1="52" x2="54" y2="42" stroke="#888" stroke-width="2" stroke-dasharray="6,4"/><line x1="10" y1="62" x2="58" y2="52" stroke="#888" stroke-width="2" stroke-dasharray="6,4"/><circle cx="30" cy="20" r="4" fill="#a8e6cf"/><path d="M24,52 L30,26 L37,48" fill="none" stroke="#fff" stroke-width="1.8"/></svg>
-      <span class="card-title">斑馬線街拍</span>
-    </div>
-
-    <!-- 7. 回頭半身 / 氣氛旅拍 -->
-    <div class="card-item" data-grid="lookBack" onclick="selectGrid('lookBack', '【氣氛半身】人物放喺偏右三分線，背對鏡頭自然回頭望，左邊留白拍出電影故事感。', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="36" y1="0" x2="36" y2="70" stroke="#888" stroke-width="1" stroke-dasharray="3,2"/><circle cx="36" cy="26" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><path d="M24,64 Q36,36 48,64" fill="none" stroke="#fff" stroke-width="1.6"/></svg>
-      <span class="card-title">回頭半身</span>
-    </div>
-
-    <!-- 8. 建築地標 / 人細景大 -->
-    <div class="card-item" data-grid="landmark" onclick="selectGrid('landmark', '【地標打卡】人細景大！人物放喺最底小框，上面 2/3 留俾宏偉建築物、鐵塔或風景。', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><polygon points="30,8 14,52 46,52" fill="none" stroke="#888" stroke-width="1.2" stroke-dasharray="3,2"/><rect x="24" y="42" width="12" height="22" rx="6" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><circle cx="30" cy="47" r="2.5" fill="#fff"/></svg>
-      <span class="card-title">地標大景</span>
-    </div>
-
-    <!-- 9. 對角坐姿 / 階梯長椅 -->
-    <div class="card-item" data-grid="bridgeSit" onclick="selectGrid('bridgeSit', '【對角坐姿】長椅、階梯或欄杆對齊斜線，人物坐喺框內，雙腳向斜下角延伸最顯腿長。', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="12" y1="56" x2="48" y2="20" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/><circle cx="34" cy="28" r="4" fill="#a8e6cf"/><path d="M22,50 L32,34" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
-      <span class="card-title">對角坐姿</span>
-    </div>
-
-    <!-- 10. Cafe 美食甜品俯拍 -->
-    <div class="card-item" data-grid="cafe" onclick="selectGrid('cafe', '【Cafe 俯拍】45度或垂直俯拍，將主菜/咖啡放喺綠圈，右上角放配菜或餐具形成對角平衡。', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><circle cx="24" cy="40" r="11" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="40" cy="22" r="7" fill="none" stroke="#fff" stroke-width="1.3" stroke-dasharray="3,2"/><line x1="10" y1="58" x2="50" y2="12" stroke="#666" stroke-width="1"/></svg>
-      <span class="card-title">Cafe 美食</span>
-    </div>
-
-    <!-- 11. 海邊日落 / 剪影背影 -->
-    <div class="card-item" data-grid="sunset" onclick="selectGrid('sunset', '【海邊日落】海平線對準下三分線，人物放喺左下或中間拍背影，天空留白拍晚霞。', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="0" y1="44" x2="60" y2="44" stroke="#a8e6cf" stroke-width="1.5"/><circle cx="42" cy="24" r="6" fill="none" stroke="#ffd180" stroke-width="1.5"/><path d="M16,64 Q22,42 28,64" fill="none" stroke="#fff" stroke-width="1.6"/></svg>
-      <span class="card-title">海邊日落</span>
-    </div>
-
-    <!-- 12. 街道/走廊中心透視 -->
-    <div class="card-item" data-grid="perspective" onclick="selectGrid('perspective', '【隧道透視】將街道、走廊或鐵路兩側對齊斜虛線，人物企喺正中消失點最吸睛！', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="30" y1="26" x2="4" y2="66" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,2"/><line x1="30" y1="26" x2="56" y2="66" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,2"/><circle cx="30" cy="36" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.8"/></svg>
-      <span class="card-title">街道透視</span>
-    </div>
-
-    <!-- 13. 經典九宮格 -->
-    <div class="card-item" data-grid="thirds" onclick="selectGrid('thirds', '【經典九宮格】萬用三分法構圖，將主體或人眼放喺四個綠色交叉點上最自然耐看。', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><line x1="20" y1="5" x2="20" y2="65" stroke="#888" stroke-width="1.2"/><line x1="40" y1="5" x2="40" y2="65" stroke="#888" stroke-width="1.2"/><line x1="5" y1="25" x2="55" y2="25" stroke="#888" stroke-width="1.2"/><line x1="5" y1="45" x2="55" y2="45" stroke="#888" stroke-width="1.2"/></svg>
-      <span class="card-title">九宮格</span>
-    </div>
-
-    <!-- 14. 無構圖 -->
-    <div class="card-item" data-grid="none" onclick="selectGrid('none', '已關閉預設構圖線', this)">
-      <svg class="card-icon" viewBox="0 0 60 70"><circle cx="30" cy="35" r="12" fill="none" stroke="#666" stroke-width="1.5"/><line x1="21" y1="26" x2="39" y2="44" stroke="#666" stroke-width="1.5"/></svg>
-      <span class="card-title">無構圖</span>
-    </div>
-  </div>
+  <!-- 動態渲染構圖模板卡片列 -->
+  <div class="card-row" id="gridCards"></div>
 
   <!-- 濾鏡卡片列 -->
   <div class="card-row" id="filterCards" style="display:none;">
@@ -269,7 +198,7 @@
   <!-- 雙膠囊切換列 -->
   <div class="tab-bar">
     <div class="pill-tab active" id="tabGrid" onclick="switchTab('grid')">
-      <span>構圖模板</span>
+      <span id="gridTabTitle">構圖模板</span>
       <span class="pill-badge" id="gridBadge">1</span>
     </div>
     <div class="pill-tab" id="tabFilter" onclick="switchTab('filter')">
@@ -310,7 +239,8 @@ const gridOverlay = document.getElementById('gridOverlay');
 const refCanvas = document.getElementById('refCanvas');
 const pipThumb = document.getElementById('pipThumb');
 
-let facingMode = 'environment';
+let facingMode = 'environment'; // 'environment' (後鏡) 或 'user' (前鏡自拍)
+let peopleCount = '1';          // '1', '2', '3', '4', 'scene'
 let currentFilter = 'korea';
 let currentZoom = 1;
 let isAlbumMode = false;
@@ -318,13 +248,7 @@ let loadedRefImg = null;
 let refMode = 'sketch';
 let lastCapturedFile = null;
 let lastCapturedUrl = null;
-
-// 記憶前後鏡頭各自用緊嘅構圖模版
-let currentGridKey = 'longLeg';
-let lastRearGridKey = 'longLeg';
-let lastSelfieGridKey = 'selfieClose';
-
-const selfieGrids = ['selfieClose', 'selfieCouple', 'mirrorOotd'];
+let currentGridId = 'r1_longLeg';
 
 const filterDefs = {
   none:   { c: 1,    b: 1,    s: 1,    sep: 0,    h: 0,  g: 0, name: '原圖' },
@@ -335,146 +259,416 @@ const filterDefs = {
   bw:     { c: 1.25, b: 0.98, s: 1,    sep: 0,    h: 0,  g: 1, name: '黑白' }
 };
 
-const grids = {
-  none: ``,
-  // 1. 大長腿全身
-  longLeg: `
-    <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-    <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-    <line x1="0" y1="115" x2="300" y2="115" stroke="rgba(255,255,255,0.65)" stroke-width="1.2" stroke-dasharray="5,5"/>
-    <line x1="95" y1="115" x2="65" y2="375" stroke="rgba(255,255,255,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
-    <line x1="205" y1="115" x2="235" y2="375" stroke="rgba(255,255,255,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
-    <rect x="102" y="122" width="96" height="252" rx="46" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8"/>
-    <circle cx="150" cy="156" r="14" fill="rgba(255,255,255,0.2)" stroke="#a8e6cf" stroke-width="1.5"/>
-    <path d="M128,178 L172,178 L166,372 L154,372 L150,260 L146,372 L134,372 Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.75)" stroke-width="1.2"/>
-    <line x1="0" y1="375" x2="300" y2="375" stroke="#a8e6cf" stroke-width="2"/>
-    <text x="150" y="392" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">▲ 腳尖貼齊底線 ▲</text>`,
+// 全方位構圖模版資料庫 (嚴格區分 front 前鏡自拍 與 rear 後鏡拍攝，以及 1/2/3/4/scene 人數)
+const TEMPLATES = [
+  // ================= 前鏡頭專屬：自拍模版 (cam: 'front') =================
+  {
+    id: 'f1_vface', cam: 'front', people: '1', title: '顯臉細自拍', tag: '1人自拍',
+    tip: '【單人顯臉細自拍】手機微舉高 15 度！雙眼對準綠線，下巴收喺 V 框內，頭頂留白避開廣角變形。',
+    icon: `<ellipse cx="30" cy="28" rx="11" ry="14" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><line x1="18" y1="26" x2="42" y2="26" stroke="#fff" stroke-width="1" stroke-dasharray="2,2"/><path d="M12,60 Q30,44 48,60" fill="none" stroke="#fff" stroke-width="1.5"/>`,
+    svg: `
+      <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+      <line x1="0" y1="80" x2="300" y2="80" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="5,5"/>
+      <text x="150" y="72" fill="rgba(255,255,255,0.7)" font-size="10" text-anchor="middle">頭頂留白區（防廣角拉長）</text>
+      <path d="M98,162 C98,100 202,100 202,162 C202,212 168,254 150,262 C132,254 98,212 98,162 Z" fill="rgba(168,230,207,0.1)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <line x1="75" y1="165" x2="225" y2="165" stroke="#a8e6cf" stroke-width="1.3" stroke-dasharray="3,3"/>
+      <circle cx="126" cy="165" r="4" fill="#a8e6cf"/><circle cx="174" cy="165" r="4" fill="#a8e6cf"/>
+      <path d="M45,380 C65,295 110,278 150,278 C190,278 235,295 255,380" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <text x="150" y="370" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">✨ 雙眼對齊綠點・下巴收喺V框內 ✨</text>`
+  },
+  {
+    id: 'f1_side', cam: 'front', people: '1', title: '側顏托腮', tag: '1人自拍',
+    tip: '【側顏三分自拍】人像放喺偏右三分線，頭微傾、手托腮形成三角形，左邊留白拍出慵懶空氣感！',
+    icon: `<ellipse cx="36" cy="30" rx="10" ry="13" transform="rotate(-10 36 30)" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><path d="M26,56 L34,42 L44,56" fill="none" stroke="#fff" stroke-width="1.5"/>`,
+    svg: `
+      <line x1="185" y1="0" x2="185" y2="400" stroke="rgba(255,255,255,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
+      <ellipse cx="182" cy="175" rx="46" ry="58" transform="rotate(-8 182 175)" fill="rgba(168,230,207,0.1)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <path d="M145,230 L125,320 L195,320" fill="none" stroke="#a8e6cf" stroke-width="1.6" stroke-dasharray="4,3"/>
+      <path d="M95,385 C115,295 150,260 190,260 C230,260 260,295 275,385" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="1.5"/>
+      <text x="70" y="190" fill="rgba(255,255,255,0.65)" font-size="11" text-anchor="middle">◀ 留白呼吸感</text>
+      <text x="150" y="370" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">頭微傾靠右・手肘貼虛線托腮顯臉小</text>`
+  },
+  {
+    id: 'f1_overhead', cam: 'front', people: '1', title: '高角度Y2K', tag: '1人自拍',
+    tip: '【俯拍大頭自拍】手機高舉過頭 45 度向下拍，抬頭望鏡頭，拍出日韓最興嘅 Y2K 立體感自拍！',
+    icon: `<circle cx="30" cy="34" r="14" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><path d="M18,62 Q30,48 42,62" fill="none" stroke="#fff" stroke-width="1.4"/>`,
+    svg: `
+      <circle cx="150" cy="185" r="64" fill="rgba(168,230,207,0.12)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <circle cx="125" cy="175" r="5" fill="#a8e6cf"/><circle cx="175" cy="175" r="5" fill="#a8e6cf"/>
+      <path d="M85,370 C95,265 120,250 150,250 C180,250 205,265 215,370" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.4" stroke-dasharray="5,4"/>
+      <text x="150" y="95" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">▼ 手機舉高 45° 往下拍・雙眼向上望 ▼</text>`
+  },
+  {
+    id: 'f2_couple', cam: 'front', people: '2', title: '情侶高低頭', tag: '2人自拍',
+    tip: '【雙人顯瘦自拍】兩人一高一低貼近，拿手機嗰位稍微退後半步或靠肩，畫面即刻有親密層次感！',
+    icon: `<circle cx="22" cy="28" r="9" fill="none" stroke="#a8e6cf" stroke-width="1.7"/><circle cx="38" cy="34" r="8.5" fill="none" stroke="#fff" stroke-width="1.5"/>`,
+    svg: `
+      <ellipse cx="110" cy="168" rx="42" ry="54" fill="rgba(168,230,207,0.12)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <path d="M30,380 C45,265 80,235 112,235 C145,235 170,255 180,320" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.4" stroke-dasharray="5,4"/>
+      <ellipse cx="192" cy="192" rx="40" ry="50" transform="rotate(-8 192 192)" fill="rgba(255,255,255,0.14)" stroke="#fff" stroke-width="1.6"/>
+      <path d="M125,380 C140,285 165,252 195,252 C225,252 255,280 270,380" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+      <text x="150" y="368" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">一高一低貼近・右邊頭微傾靠肩最自然</text>`
+  },
+  {
+    id: 'f2_cheek', cam: 'front', people: '2', title: '閨蜜貼面', tag: '2人自拍',
+    tip: '【閨蜜對稱貼面】兩人向中間微傾貼面，下巴收向中心點形成 V 字，兩邊臉頰都唔會被廣角拉闊！',
+    icon: `<circle cx="23" cy="32" r="9" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><circle cx="37" cy="32" r="9" fill="none" stroke="#a8e6cf" stroke-width="1.6"/>`,
+    svg: `
+      <ellipse cx="112" cy="180" rx="38" ry="50" transform="rotate(10 112 180)" fill="rgba(168,230,207,0.12)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <ellipse cx="188" cy="180" rx="38" ry="50" transform="rotate(-10 188 180)" fill="rgba(168,230,207,0.12)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <path d="M35,380 C55,260 120,250 150,280 C180,250 245,260 265,380" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="1.5"/>
+      <text x="150" y="368" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">兩人向中間微傾貼面・避開鏡頭邊緣變形</text>`
+  },
+  {
+    id: 'f3_tri', cam: 'front', people: '3', title: '三人鐵三角', tag: '3人自拍',
+    tip: '【三人鐵三角自拍】中間朋友企高少少靠後，左右兩位微蹲向前傾，三個人頭排成正三角形最緊湊好睇！',
+    icon: `<circle cx="30" cy="22" r="7" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><circle cx="18" cy="38" r="7" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="42" cy="38" r="7" fill="none" stroke="#fff" stroke-width="1.5"/>`,
+    svg: `
+      <polygon points="150,125 90,225 210,225" fill="none" stroke="rgba(168,230,207,0.4)" stroke-width="1.2" stroke-dasharray="4,4"/>
+      <ellipse cx="150" cy="138" rx="32" ry="42" fill="rgba(168,230,207,0.15)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <ellipse cx="88" cy="210" rx="34" ry="44" transform="rotate(8 88 210)" fill="rgba(255,255,255,0.14)" stroke="#fff" stroke-width="1.6"/>
+      <ellipse cx="212" cy="210" rx="34" ry="44" transform="rotate(-8 212 210)" fill="rgba(255,255,255,0.14)" stroke="#fff" stroke-width="1.6"/>
+      <text x="150" y="368" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">中間靠後企高・兩側向前傾排成三角形</text>`
+  },
+  {
+    id: 'f3_diag', cam: 'front', people: '3', title: '三人斜線階梯', tag: '3人自拍',
+    tip: '【三人斜線自拍】手機舉去左上或右上角，三個人由高至低斜線排列，每個都入鏡而且完全唔迫！',
+    icon: `<circle cx="16" cy="44" r="6.5" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="30" cy="32" r="6.5" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><circle cx="44" cy="20" r="6.5" fill="none" stroke="#fff" stroke-width="1.5"/>`,
+    svg: `
+      <line x1="30" y1="280" x2="270" y2="110" stroke="rgba(168,230,207,0.5)" stroke-width="1.5" stroke-dasharray="5,5"/>
+      <ellipse cx="220" cy="135" rx="30" ry="38" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.5"/>
+      <ellipse cx="150" cy="185" rx="32" ry="40" fill="rgba(168,230,207,0.15)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <ellipse cx="80" cy="235" rx="34" ry="42" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.5"/>
+      <text x="150" y="368" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">對齊斜線由高至低排・活潑又有立體感</text>`
+  },
+  {
+    id: 'f4_group', cam: 'front', people: '4', title: '多人聚會自拍', tag: '4人+自拍',
+    tip: '【4人+ 大合照自拍】掌鏡人企最前壓低身體，後面朋友圍成半圓扇形向中間靠攏，避開四隻角防變形！',
+    icon: `<circle cx="20" cy="22" r="5.5" fill="none" stroke="#fff" stroke-width="1.4"/><circle cx="40" cy="22" r="5.5" fill="none" stroke="#fff" stroke-width="1.4"/><circle cx="15" cy="40" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.5"/><circle cx="30" cy="42" r="6.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/><circle cx="45" cy="40" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`,
+    svg: `
+      <ellipse cx="105" cy="135" rx="26" ry="34" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="1.4"/>
+      <ellipse cx="195" cy="135" rx="26" ry="34" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="1.4"/>
+      <ellipse cx="68" cy="215" rx="28" ry="36" fill="rgba(168,230,207,0.14)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <ellipse cx="150" cy="225" rx="30" ry="38" fill="rgba(168,230,207,0.18)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <ellipse cx="232" cy="215" rx="28" ry="36" fill="rgba(168,230,207,0.14)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <rect x="20" y="65" width="260" height="250" rx="30" fill="none" stroke="rgba(168,230,207,0.4)" stroke-width="1.2" stroke-dasharray="6,4"/>
+      <text x="150" y="368" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">前後兩排交錯企・所有人頭收喺綠虛線框內</text>`
+  },
 
-  // 2. 顯臉細自拍 (前鏡頭自動切換)
-  selfieClose: `
-    <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
-    <line x1="0" y1="82" x2="300" y2="82" stroke="rgba(255,255,255,0.45)" stroke-width="1" stroke-dasharray="5,5"/>
-    <text x="150" y="74" fill="rgba(255,255,255,0.7)" font-size="10" text-anchor="middle">頭頂留白區（避開廣角拉長）</text>
-    <!-- V臉鵝蛋框 -->
-    <path d="M98,162 C98,100 202,100 202,162 C202,212 168,254 150,262 C132,254 98,212 98,162 Z" fill="rgba(168,230,207,0.08)" stroke="#a8e6cf" stroke-width="1.8"/>
-    <!-- 黃金眼神水平線 -->
-    <line x1="75" y1="165" x2="225" y2="165" stroke="#a8e6cf" stroke-width="1.3" stroke-dasharray="3,3"/>
-    <circle cx="126" cy="165" r="4" fill="#a8e6cf"/>
-    <circle cx="174" cy="165" r="4" fill="#a8e6cf"/>
-    <!-- 肩頸鎖骨延伸線 -->
-    <path d="M45,380 C65,295 110,278 150,278 C190,278 235,295 255,380" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-dasharray="6,4"/>
-    <text x="150" y="365" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">✨ 眼睛對齊綠點・下巴微收顯臉細 ✨</text>`,
+  // ================= 後鏡頭專屬：1人模版 (cam: 'rear', people: '1') =================
+  {
+    id: 'r1_longLeg', cam: 'rear', people: '1', title: '大長腿全身', tag: '1人',
+    tip: '【大長腿全身】腳尖貼齊最底綠線，頭頂留白一格，手機微傾立刻拍出逆天長腿！',
+    icon: `<line x1="0" y1="18" x2="60" y2="18" stroke="#888" stroke-width="1.2" stroke-dasharray="3,2"/><rect x="18" y="20" width="24" height="44" rx="12" fill="none" stroke="#fff" stroke-width="1.5"/><circle cx="30" cy="28" r="3.5" fill="none" stroke="#a8e6cf" stroke-width="1.5"/><line x1="12" y1="64" x2="48" y2="64" stroke="#a8e6cf" stroke-width="2"/>`,
+    svg: `
+      <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.2)" stroke-width="1"/><line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <line x1="0" y1="115" x2="300" y2="115" stroke="rgba(255,255,255,0.65)" stroke-width="1.2" stroke-dasharray="5,5"/>
+      <rect x="102" y="122" width="96" height="252" rx="46" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8"/>
+      <circle cx="150" cy="156" r="14" fill="rgba(255,255,255,0.2)" stroke="#a8e6cf" stroke-width="1.5"/>
+      <path d="M128,178 L172,178 L166,372 L154,372 L150,260 L146,372 L134,372 Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.75)" stroke-width="1.2"/>
+      <line x1="0" y1="375" x2="300" y2="375" stroke="#a8e6cf" stroke-width="2"/>
+      <text x="150" y="392" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">▲ 腳尖貼齊底線 ▲</text>`
+  },
+  {
+    id: 'r1_bridge', cam: 'rear', people: '1', title: '河畔全身', tag: '1人',
+    tip: '【河畔欄杆全身】對準橫線拍橋面或海平線，將人物放喺圓框正中央，背景對稱更好睇。',
+    icon: `<line x1="0" y1="22" x2="60" y2="22" stroke="#888" stroke-width="1.5"/><line x1="0" y1="42" x2="60" y2="42" stroke="#888" stroke-width="1.5"/><rect x="20" y="20" width="20" height="44" rx="10" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="30" cy="30" r="3.5" fill="#fff"/>`,
+    svg: `
+      <line x1="0" y1="110" x2="300" y2="110" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/><line x1="0" y1="215" x2="300" y2="215" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
+      <rect x="112" y="110" width="76" height="225" rx="32" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.6"/>
+      <circle cx="150" cy="148" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
+      <path d="M132,232 C132,175 168,175 168,232 L160,315 L140,315 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>`
+  },
+  {
+    id: 'r1_crosswalk', cam: 'rear', people: '1', title: '斑馬線街拍', tag: '1人',
+    tip: '【斑馬線街拍】斜角對準馬路斑馬線，捉拍行路邁步瞬間，自然瀟灑唔尷尬！',
+    icon: `<line x1="6" y1="52" x2="54" y2="42" stroke="#888" stroke-width="2" stroke-dasharray="6,4"/><circle cx="30" cy="20" r="4" fill="#a8e6cf"/><path d="M24,52 L30,26 L37,48" fill="none" stroke="#fff" stroke-width="1.8"/>`,
+    svg: `
+      <line x1="0" y1="255" x2="300" y2="195" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/><line x1="0" y1="365" x2="300" y2="295" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
+      <circle cx="150" cy="122" r="13" fill="rgba(168,230,207,0.25)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <path d="M132,145 L168,145 L182,315 L162,318 L148,235 L125,310 L108,305 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.5"/>`
+  },
+  {
+    id: 'r1_lookBack', cam: 'rear', people: '1', title: '回頭半身', tag: '1人',
+    tip: '【氣氛回頭半身】人物放喺偏右三分線，背對鏡頭自然回頭望，左邊留白拍出電影故事感。',
+    icon: `<line x1="36" y1="0" x2="36" y2="70" stroke="#888" stroke-width="1" stroke-dasharray="3,2"/><circle cx="36" cy="26" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><path d="M24,64 Q36,36 48,64" fill="none" stroke="#fff" stroke-width="1.6"/>`,
+    svg: `
+      <line x1="185" y1="0" x2="185" y2="400" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="4,4"/>
+      <ellipse cx="185" cy="160" rx="28" ry="34" fill="rgba(168,230,207,0.15)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <path d="M120,395 C128,245 155,210 190,210 C225,210 248,255 258,395 Z" fill="rgba(255,255,255,0.18)" stroke="#fff" stroke-width="1.5"/>`
+  },
+  {
+    id: 'r1_sit', cam: 'rear', people: '1', title: '對角坐姿', tag: '1人',
+    tip: '【對角坐姿】長椅、階梯或欄杆對齊斜線，人物坐喺框內，雙腳向斜下角延伸最顯腿長。',
+    icon: `<line x1="12" y1="56" x2="48" y2="20" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/><circle cx="34" cy="28" r="4" fill="#a8e6cf"/><path d="M22,50 L32,34" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`,
+    svg: `
+      <line x1="0" y1="195" x2="300" y2="195" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/><line x1="0" y1="275" x2="112" y2="195" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
+      <rect x="112" y="102" width="84" height="175" rx="34" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.6"/>
+      <circle cx="154" cy="136" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
+      <path d="M134,205 C135,155 173,155 174,205 L142,272 L122,265 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>`
+  },
 
-  // 3. 雙人情侶自拍
-  selfieCouple: `
-    <line x1="0" y1="90" x2="300" y2="90" stroke="rgba(255,255,255,0.35)" stroke-width="1" stroke-dasharray="4,4"/>
-    <!-- 左邊人物 (稍高/靠後) -->
-    <ellipse cx="112" cy="168" rx="42" ry="54" fill="rgba(168,230,207,0.1)" stroke="#a8e6cf" stroke-width="1.8"/>
-    <path d="M35,375 C45,265 80,235 112,235 C145,235 170,255 180,320" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.4" stroke-dasharray="5,4"/>
-    <!-- 右邊人物 (稍低/微傾靠肩) -->
-    <ellipse cx="192" cy="192" rx="40" ry="50" transform="rotate(-8 192 192)" fill="rgba(255,255,255,0.12)" stroke="#fff" stroke-width="1.6"/>
-    <path d="M125,380 C140,285 165,252 195,252 C225,252 255,280 270,380" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
-    <text x="150" y="368" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">兩人一高一低貼近・頭微傾更親密</text>`,
+  // ================= 後鏡頭專屬：2人模版 (cam: 'rear', people: '2') =================
+  {
+    id: 'r2_stand', cam: 'rear', people: '2', title: '情侶全身並肩', tag: '2人',
+    tip: '【雙人全身合照】兩人並肩企喺中央框內，一高一低或者頭微靠，腳尖貼齊底線拍出修長比例！',
+    icon: `<circle cx="24" cy="24" r="3.5" fill="#a8e6cf"/><circle cx="36" cy="27" r="3.5" fill="#fff"/><rect x="16" y="18" width="28" height="44" rx="10" fill="none" stroke="#a8e6cf" stroke-width="1.6"/>`,
+    svg: `
+      <line x1="0" y1="115" x2="300" y2="115" stroke="rgba(255,255,255,0.5)" stroke-width="1" stroke-dasharray="5,5"/>
+      <rect x="78" y="115" width="144" height="258" rx="45" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.6"/>
+      <!-- 左人像 -->
+      <circle cx="126" cy="148" r="12" fill="rgba(168,230,207,0.25)" stroke="#a8e6cf" stroke-width="1.5"/>
+      <path d="M104,172 L148,172 L144,370 L110,370 Z" fill="rgba(255,255,255,0.16)" stroke="#fff" stroke-width="1.2"/>
+      <!-- 右人像 -->
+      <circle cx="174" cy="158" r="11.5" fill="rgba(255,255,255,0.25)" stroke="#fff" stroke-width="1.5"/>
+      <path d="M154,180 L194,180 L190,370 L158,370 Z" fill="rgba(168,230,207,0.16)" stroke="#a8e6cf" stroke-width="1.2"/>
+      <line x1="0" y1="372" x2="300" y2="372" stroke="#a8e6cf" stroke-width="2"/>
+      <text x="150" y="390" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">▲ 兩人貼近並肩・腳底貼齊綠線 ▲</text>`
+  },
+  {
+    id: 'r2_walk', cam: 'rear', people: '2', title: '牽手散步抓拍', tag: '2人',
+    tip: '【雙人散步抓拍】叫兩位邊行邊傾偈對望，一前一後牽手行，連拍捉最自然嘅互動瞬間！',
+    icon: `<circle cx="22" cy="24" r="3.5" fill="#fff"/><circle cx="38" cy="26" r="3.5" fill="#a8e6cf"/><path d="M18,56 L22,30 L30,40 L38,32 L42,56" fill="none" stroke="#fff" stroke-width="1.6"/>`,
+    svg: `
+      <circle cx="115" cy="145" r="12" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.5"/>
+      <path d="M98,168 L132,168 L142,355 L118,355 L112,265 L92,350 Z" fill="rgba(255,255,255,0.18)" stroke="#fff" stroke-width="1.3"/>
+      <circle cx="188" cy="155" r="12" fill="rgba(168,230,207,0.25)" stroke="#a8e6cf" stroke-width="1.5"/>
+      <path d="M170,178 L204,178 L212,355 L190,355 L182,268 L162,350 Z" fill="rgba(168,230,207,0.18)" stroke="#a8e6cf" stroke-width="1.3"/>
+      <!-- 牽手連線 -->
+      <path d="M132,225 Q150,245 170,225" fill="none" stroke="#a8e6cf" stroke-width="2" stroke-dasharray="4,3"/>
+      <text x="150" y="382" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">一前一後牽手慢行・互望傾偈最自然</text>`
+  },
+  {
+    id: 'r2_back', cam: 'rear', people: '2', title: '雙人電影感背影', tag: '2人',
+    tip: '【雙人半身/背影】人物放喺下三分一，並肩坐或企望向遠方風景，上面留白拍出日劇感！',
+    icon: `<line x1="0" y1="36" x2="60" y2="36" stroke="#888" stroke-width="1.2"/><circle cx="24" cy="40" r="4.5" fill="#a8e6cf"/><circle cx="36" cy="42" r="4.5" fill="#fff"/>`,
+    svg: `
+      <line x1="0" y1="220" x2="300" y2="220" stroke="rgba(255,255,255,0.6)" stroke-width="1.2" stroke-dasharray="5,5"/>
+      <circle cx="125" cy="235" r="16" fill="rgba(168,230,207,0.22)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <path d="M90,390 C95,275 155,275 160,390 Z" fill="rgba(255,255,255,0.18)" stroke="#fff" stroke-width="1.4"/>
+      <circle cx="178" cy="245" r="15" fill="rgba(255,255,255,0.22)" stroke="#fff" stroke-width="1.6"/>
+      <path d="M145,390 C150,285 205,285 210,390 Z" fill="rgba(168,230,207,0.18)" stroke="#a8e6cf" stroke-width="1.4"/>
+      <text x="150" y="120" fill="rgba(255,255,255,0.6)" font-size="12" text-anchor="middle">▲ 天空 / 建築大面積留白區 ▲</text>`
+  },
 
-  // 4. 對鏡穿搭 OOTD
-  mirrorOotd: `
-    <rect x="45" y="35" width="210" height="330" rx="14" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-dasharray="6,4"/>
-    <circle cx="150" cy="112" r="20" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" stroke-width="1.4"/>
-    <!-- 手機擋臉黃金位 -->
-    <rect x="154" y="98" width="22" height="36" rx="4" fill="rgba(168,230,207,0.35)" stroke="#a8e6cf" stroke-width="1.8"/>
-    <!-- 穿搭身形與延伸前腳 -->
-    <path d="M115,142 L185,142 L178,245 L195,355 L172,355 L150,255 L132,340 L114,340 Z" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.4"/>
-    <text x="150" y="384" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">手機對準綠框遮半臉・一腳向前延伸</text>`,
+  // ================= 後鏡頭專屬：3人模版 (cam: 'rear', people: '3') =================
+  {
+    id: 'r3_pyramid', cam: 'rear', people: '3', title: '三人正三角', tag: '3人',
+    tip: '【三人正三角構圖】中間嗰位企直，左右兩位微蹲或坐喺梯級/長椅，高低錯落似足雜誌封面！',
+    icon: `<circle cx="30" cy="20" r="4" fill="#a8e6cf"/><circle cx="18" cy="34" r="4" fill="#fff"/><circle cx="42" cy="34" r="4" fill="#fff"/><polygon points="30,14 12,56 48,56" fill="none" stroke="#a8e6cf" stroke-width="1.4"/>`,
+    svg: `
+      <polygon points="150,105 55,365 245,365" fill="rgba(168,230,207,0.06)" stroke="rgba(168,230,207,0.6)" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <!-- 中間企立 -->
+      <circle cx="150" cy="140" r="12" fill="rgba(168,230,207,0.3)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <path d="M130,162 L170,162 L166,365 L134,365 Z" fill="rgba(255,255,255,0.18)" stroke="#fff" stroke-width="1.3"/>
+      <!-- 左右微蹲/坐姿 -->
+      <circle cx="98" cy="205" r="12" fill="rgba(255,255,255,0.25)" stroke="#fff" stroke-width="1.5"/>
+      <path d="M75,228 L120,228 L115,365 L70,365 Z" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.2"/>
+      <circle cx="202" cy="205" r="12" fill="rgba(255,255,255,0.25)" stroke="#fff" stroke-width="1.5"/>
+      <path d="M180,228 L225,228 L230,365 L185,365 Z" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.2"/>
+      <text x="150" y="388" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">中間企高・兩側微蹲或坐下形成穩固三角形</text>`
+  },
+  {
+    id: 'r3_line', cam: 'rear', people: '3', title: '三人並肩行', tag: '3人',
+    tip: '【三人街拍並肩】三個人搭膊頭或挽手並排向前行，腳步交錯邁出，充滿青春動感！',
+    icon: `<circle cx="18" cy="24" r="3.5" fill="#fff"/><circle cx="30" cy="22" r="3.5" fill="#a8e6cf"/><circle cx="42" cy="24" r="3.5" fill="#fff"/><line x1="10" y1="58" x2="50" y2="58" stroke="#a8e6cf" stroke-width="1.8"/>`,
+    svg: `
+      <rect x="42" y="115" width="216" height="255" rx="36" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5"/>
+      <circle cx="92" cy="152" r="11" fill="rgba(255,255,255,0.25)" stroke="#fff" stroke-width="1.4"/>
+      <path d="M72,174 L112,174 L110,365 L74,365 Z" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.2"/>
+      <circle cx="150" cy="146" r="11.5" fill="rgba(168,230,207,0.3)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <path d="M130,168 L170,168 L168,365 L132,365 Z" fill="rgba(168,230,207,0.18)" stroke="#a8e6cf" stroke-width="1.4"/>
+      <circle cx="208" cy="152" r="11" fill="rgba(255,255,255,0.25)" stroke="#fff" stroke-width="1.4"/>
+      <path d="M188,174 L228,174 L226,365 L190,365 Z" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="1.2"/>
+      <line x1="20" y1="368" x2="280" y2="368" stroke="#a8e6cf" stroke-width="2"/>
+      <text x="150" y="388" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">三人貼近搭肩・一齊邁步向鏡頭行</text>`
+  },
+  {
+    id: 'r3_hug', cam: 'rear', people: '3', title: '三人半身擁抱', tag: '3人',
+    tip: '【三人親密半身】2x 焦段半身特寫！中間做主角，兩側朋友向中間靠攏搭肩，背景虛化更突出表情。',
+    icon: `<circle cx="30" cy="28" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.6"/><circle cx="17" cy="32" r="5.5" fill="none" stroke="#fff" stroke-width="1.4"/><circle cx="43" cy="32" r="5.5" fill="none" stroke="#fff" stroke-width="1.4"/>`,
+    svg: `
+      <circle cx="150" cy="175" r="24" fill="rgba(168,230,207,0.22)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <circle cx="92" cy="192" r="22" fill="rgba(255,255,255,0.18)" stroke="#fff" stroke-width="1.6"/>
+      <circle cx="208" cy="192" r="22" fill="rgba(255,255,255,0.18)" stroke="#fff" stroke-width="1.6"/>
+      <path d="M35,385 C50,245 250,245 265,385 Z" fill="rgba(255,255,255,0.14)" stroke="#a8e6cf" stroke-width="1.5" stroke-dasharray="6,4"/>
+      <text x="150" y="368" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">兩側朋友頭向中間靠・拍出溫馨半身特寫</text>`
+  },
 
-  // 5. 河畔全身
-  bridgeStand: `
-    <line x1="0" y1="110" x2="300" y2="110" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
-    <line x1="0" y1="215" x2="300" y2="215" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
-    <line x1="0" y1="248" x2="300" y2="248" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <rect x="112" y="110" width="76" height="225" rx="32" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.6"/>
-    <circle cx="150" cy="148" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
-    <path d="M132,232 C132,175 168,175 168,232 L160,315 L140,315 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>`,
+  // ================= 後鏡頭專屬：4人+ 團體模版 (cam: 'rear', people: '4') =================
+  {
+    id: 'r4_vshape', cam: 'rear', people: '4', title: '團體V字顯瘦陣', tag: '4人+',
+    tip: '【團體 V 字站姿】中間朋友退後半步，兩側朋友稍微靠前側身企，排成 V 字型人人顯瘦唔死板！',
+    icon: `<circle cx="12" cy="22" r="3" fill="#a8e6cf"/><circle cx="24" cy="28" r="3" fill="#fff"/><circle cx="36" cy="28" r="3" fill="#fff"/><circle cx="48" cy="22" r="3" fill="#a8e6cf"/><polyline points="10,20 30,34 50,20" fill="none" stroke="#a8e6cf" stroke-width="1.4"/>`,
+    svg: `
+      <polyline points="35,140 150,175 265,140" fill="none" stroke="#a8e6cf" stroke-width="1.6" stroke-dasharray="5,4"/>
+      <!-- 4人 V 字排列 -->
+      <circle cx="62" cy="148" r="11" fill="rgba(168,230,207,0.28)" stroke="#a8e6cf" stroke-width="1.5"/>
+      <path d="M44,170 L80,170 L78,368 L46,368 Z" fill="rgba(255,255,255,0.16)" stroke="#fff" stroke-width="1.2"/>
+      <circle cx="120" cy="162" r="10.5" fill="rgba(255,255,255,0.22)" stroke="#fff" stroke-width="1.4"/>
+      <path d="M102,182 L138,182 L136,355 L104,355 Z" fill="rgba(255,255,255,0.14)" stroke="#fff" stroke-width="1.2"/>
+      <circle cx="180" cy="162" r="10.5" fill="rgba(255,255,255,0.22)" stroke="#fff" stroke-width="1.4"/>
+      <path d="M162,182 L198,182 L196,355 L164,355 Z" fill="rgba(255,255,255,0.14)" stroke="#fff" stroke-width="1.2"/>
+      <circle cx="238" cy="148" r="11" fill="rgba(168,230,207,0.28)" stroke="#a8e6cf" stroke-width="1.5"/>
+      <path d="M220,170 L256,170 L254,368 L222,368 Z" fill="rgba(255,255,255,0.16)" stroke="#fff" stroke-width="1.2"/>
+      <line x1="15" y1="370" x2="285" y2="370" stroke="#a8e6cf" stroke-width="2"/>
+      <text x="150" y="390" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">兩側微側身靠前・中間退後半步排成 V 字</text>`
+  },
+  {
+    id: 'r4_tworow', cam: 'rear', people: '4', title: '前後兩排大合照', tag: '4人+',
+    tip: '【5-8人前後兩排】前排蹲下或坐低，後排企喺前排兩個人中間嘅空隙位（插空企），保證無一個人被遮住！',
+    icon: `<circle cx="18" cy="22" r="3.5" fill="#fff"/><circle cx="30" cy="22" r="3.5" fill="#fff"/><circle cx="42" cy="22" r="3.5" fill="#fff"/><circle cx="24" cy="38" r="4" fill="#a8e6cf"/><circle cx="36" cy="38" r="4" fill="#a8e6cf"/>`,
+    svg: `
+      <rect x="28" y="110" width="244" height="255" rx="24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.4" stroke-dasharray="6,4"/>
+      <!-- 後排 3-4 人 -->
+      <circle cx="75" cy="145" r="11" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.4"/>
+      <circle cx="125" cy="142" r="11" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.4"/>
+      <circle cx="175" cy="142" r="11" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.4"/>
+      <circle cx="225" cy="145" r="11" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.4"/>
+      <!-- 前排蹲姿插空 -->
+      <circle cx="100" cy="215" r="12" fill="rgba(168,230,207,0.3)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <circle cx="150" cy="215" r="12" fill="rgba(168,230,207,0.3)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <circle cx="200" cy="215" r="12" fill="rgba(168,230,207,0.3)" stroke="#a8e6cf" stroke-width="1.6"/>
+      <path d="M55,365 L80,235 L220,235 L245,365 Z" fill="rgba(168,230,207,0.12)" stroke="#a8e6cf" stroke-width="1.3"/>
+      <text x="150" y="388" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">前排微蹲・後排對準前排肩膀空隙企</text>`
+  },
 
-  // 6. 斑馬線過馬路街拍
-  crosswalk: `
-    <line x1="0" y1="255" x2="300" y2="195" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
-    <line x1="0" y1="365" x2="300" y2="295" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>
-    <!-- 斑馬線透視條紋 -->
-    <polygon points="30,275 85,262 110,320 45,335" fill="rgba(255,255,255,0.15)"/>
-    <polygon points="115,255 170,242 200,298 135,312" fill="rgba(255,255,255,0.15)"/>
-    <polygon points="200,235 255,222 285,275 225,290" fill="rgba(255,255,255,0.15)"/>
-    <!-- 行走動態人像框 -->
-    <circle cx="150" cy="122" r="13" fill="rgba(168,230,207,0.25)" stroke="#a8e6cf" stroke-width="1.6"/>
-    <path d="M132,145 L168,145 L182,315 L162,318 L148,235 L125,310 L108,305 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.5"/>
-    <text x="150" y="385" fill="#a8e6cf" font-size="11" font-weight="600" text-anchor="middle">對齊馬路斜線・邊行邊抓拍邁步瞬間</text>`,
+  // ================= 後鏡頭專屬：景物 / 美食模版 (cam: 'rear', people: 'scene') =================
+  {
+    id: 'rs_cafe', cam: 'rear', people: 'scene', title: 'Cafe 美食對角', tag: '美食',
+    tip: '【Cafe 美食俯拍】45度或垂直俯拍，將主菜/蛋糕放喺左下綠圈，右上放飲品形成對角線平衡。',
+    icon: `<circle cx="22" cy="42" r="10" fill="none" stroke="#a8e6cf" stroke-width="1.8"/><circle cx="40" cy="22" r="7" fill="none" stroke="#fff" stroke-width="1.3" stroke-dasharray="3,2"/>`,
+    svg: `
+      <line x1="0" y1="320" x2="300" y2="80" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-dasharray="5,5"/>
+      <circle cx="115" cy="235" r="56" fill="rgba(168,230,207,0.1)" stroke="#a8e6cf" stroke-width="1.8"/>
+      <circle cx="205" cy="135" r="36" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.8)" stroke-width="1.4" stroke-dasharray="4,4"/>
+      <text x="115" y="310" fill="#a8e6cf" font-size="10" text-anchor="middle">主食/蛋糕</text><text x="205" y="185" fill="#fff" font-size="10" text-anchor="middle">咖啡/配飲</text>`
+  },
+  {
+    id: 'rs_persp', cam: 'rear', people: 'scene', title: '街道建築透視', tag: '風景',
+    tip: '【中心消失點透視】將街道、走廊或建築兩側對齊斜虛線，拍出極具視覺衝擊力嘅對稱空間感！',
+    icon: `<line x1="30" y1="26" x2="4" y2="66" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,2"/><line x1="30" y1="26" x2="56" y2="66" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,2"/><circle cx="30" cy="36" r="6" fill="none" stroke="#a8e6cf" stroke-width="1.8"/>`,
+    svg: `
+      <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/><line x1="0" y1="245" x2="300" y2="245" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <line x1="150" y1="180" x2="0" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
+      <line x1="150" y1="180" x2="300" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
+      <circle cx="150" cy="215" r="24" fill="rgba(255,255,255,0.15)" stroke="#a8e6cf" stroke-width="1.5"/>`
+  },
+  {
+    id: 'rs_thirds', cam: 'rear', people: 'scene', title: '經典九宮格', tag: '萬用',
+    tip: '【經典九宮格】萬用三分法構圖，將地平線對齊橫線，主體放喺四個綠色交叉點上最自然耐看。',
+    icon: `<line x1="20" y1="5" x2="20" y2="65" stroke="#888" stroke-width="1.2"/><line x1="40" y1="5" x2="40" y2="65" stroke="#888" stroke-width="1.2"/><line x1="5" y1="25" x2="55" y2="25" stroke="#888" stroke-width="1.2"/><line x1="5" y1="45" x2="55" y2="45" stroke="#888" stroke-width="1.2"/>`,
+    svg: `
+      <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/><line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+      <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.55)" stroke-width="1"/><line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+      <circle cx="100" cy="133" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/><circle cx="200" cy="133" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
+      <circle cx="100" cy="266" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/><circle cx="200" cy="266" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`
+  }
+];
 
-  // 7. 回頭半身 / 氣氛旅拍
-  lookBack: `
-    <line x1="185" y1="0" x2="185" y2="400" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="4,4"/>
-    <line x1="0" y1="155" x2="300" y2="155" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-dasharray="4,4"/>
-    <ellipse cx="185" cy="160" rx="28" ry="34" fill="rgba(168,230,207,0.15)" stroke="#a8e6cf" stroke-width="1.8"/>
-    <circle cx="174" cy="155" r="4" fill="#a8e6cf"/>
-    <path d="M120,395 C128,245 155,210 190,210 C225,210 248,255 258,395 Z" fill="rgba(255,255,255,0.18)" stroke="#fff" stroke-width="1.5"/>
-    <text x="90" y="200" fill="rgba(255,255,255,0.6)" font-size="11" text-anchor="middle">◀ 風景留白區</text>`,
+// 根據當前「前後鏡頭」與「人數」動態過濾並生成構圖卡片
+function renderGridCards() {
+  const camType = (facingMode === 'user') ? 'front' : 'rear';
+  const sceneBtn = document.getElementById('sceneBtn');
+  
+  // 前鏡頭自拍時自動隱藏「景物」按鈕，確保 100% 只有自拍模版
+  if (camType === 'front') {
+    sceneBtn.style.display = 'none';
+    if (peopleCount === 'scene') peopleCount = '1';
+  } else {
+    sceneBtn.style.display = 'inline-block';
+  }
 
-  // 8. 地標大景 / 人細景大
-  landmark: `
-    <line x1="0" y1="265" x2="300" y2="265" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
-    <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="4,4"/>
-    <!-- 後方高聳建築地標示意框 -->
-    <polygon points="150,28 75,265 225,265" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.5)" stroke-width="1.2" stroke-dasharray="5,5"/>
-    <!-- 下方小人像框 -->
-    <rect x="122" y="235" width="56" height="135" rx="28" fill="rgba(168,230,207,0.15)" stroke="#a8e6cf" stroke-width="1.8"/>
-    <circle cx="150" cy="260" r="8" fill="#fff"/>
-    <path d="M135,365 L140,275 L160,275 L165,365 Z" fill="rgba(255,255,255,0.4)"/>`,
+  document.querySelectorAll('#peopleBar .p-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.p === peopleCount);
+  });
 
-  // 9. 對角坐姿
-  bridgeSit: `
-    <line x1="0" y1="120" x2="300" y2="120" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
-    <line x1="0" y1="195" x2="300" y2="195" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
-    <line x1="0" y1="275" x2="112" y2="195" stroke="rgba(255,255,255,0.75)" stroke-width="1.4"/>
-    <rect x="112" y="102" width="84" height="175" rx="34" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.6"/>
-    <circle cx="154" cy="136" r="11" fill="rgba(255,255,255,0.28)" stroke="#a8e6cf" stroke-width="1.4"/>
-    <path d="M134,205 C135,155 173,155 174,205 L142,272 L122,265 Z" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>`,
+  const modeLabel = (camType === 'front') ? `🤳 前鏡自拍專屬・${peopleCount}人構圖` : `📷 後鏡拍攝・${peopleCount === 'scene' ? '景物' : peopleCount + '人'}構圖`;
+  document.getElementById('camModeTag').innerText = modeLabel;
+  document.getElementById('gridTabTitle').innerText = (camType === 'front') ? '自拍構圖' : '構圖模板';
 
-  // 10. Cafe 美食甜品對角俯拍
-  cafe: `
-    <line x1="0" y1="320" x2="300" y2="80" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-dasharray="5,5"/>
-    <!-- 主菜/主體大圓 -->
-    <circle cx="115" cy="235" r="56" fill="rgba(168,230,207,0.1)" stroke="#a8e6cf" stroke-width="1.8"/>
-    <circle cx="115" cy="235" r="4" fill="#a8e6cf"/>
-    <!-- 配角飲品/甜品小圓 -->
-    <circle cx="205" cy="135" r="36" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.8)" stroke-width="1.4" stroke-dasharray="4,4"/>
-    <text x="115" y="310" fill="#a8e6cf" font-size="10" text-anchor="middle">主食/蛋糕</text>
-    <text x="205" y="185" fill="#fff" font-size="10" text-anchor="middle">咖啡/配飲</text>`,
+  const matched = TEMPLATES.filter(t => t.cam === camType && t.people === peopleCount);
+  const container = document.getElementById('gridCards');
 
-  // 11. 海邊日落背影
-  sunset: `
-    <line x1="0" y1="260" x2="300" y2="260" stroke="#a8e6cf" stroke-width="1.6"/>
-    <circle cx="205" cy="145" r="24" fill="rgba(255,209,128,0.2)" stroke="#ffd180" stroke-width="1.6" stroke-dasharray="4,3"/>
-    <circle cx="105" cy="225" r="14" fill="rgba(255,255,255,0.25)" stroke="#fff" stroke-width="1.5"/>
-    <path d="M68,385 C75,265 135,265 142,385 Z" fill="rgba(255,255,255,0.2)" stroke="#fff" stroke-width="1.5"/>
-    <text x="150" y="252" fill="#a8e6cf" font-size="10" text-anchor="middle">─── 海平線對齊此線 ───</text>`,
+  // 保留左邊第一張「匯入網圖」卡片 + 對應鏡頭與人數嘅專屬模版 + 關閉構圖
+  let html = `
+    <div class="card-item" onclick="document.getElementById('refInput').click()" style="border-style:dashed; border-color:#a8e6cf;">
+      <svg class="card-icon" viewBox="0 0 60 70"><path d="M30,18 L30,48 M15,33 L45,33" stroke="#a8e6cf" stroke-width="2.5" stroke-linecap="round"/></svg>
+      <span class="card-title" style="color:#a8e6cf;">匯入網圖</span>
+    </div>`;
 
-  // 12. 街道透視
-  perspective: `
-    <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.65)" stroke-width="1.2"/>
-    <line x1="0" y1="245" x2="300" y2="245" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
-    <line x1="150" y1="180" x2="0" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
-    <line x1="150" y1="180" x2="300" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="1.2" stroke-dasharray="5,5"/>
-    <circle cx="150" cy="215" r="24" fill="rgba(255,255,255,0.15)" stroke="#a8e6cf" stroke-width="1.5"/>`,
+  matched.forEach((t, idx) => {
+    html += `
+      <div class="card-item ${idx === 0 ? 'active' : ''}" data-id="${t.id}" onclick="applyTemplate('${t.id}', this)">
+        <span class="badge-tag">${t.tag}</span>
+        <svg class="card-icon" viewBox="0 0 60 70">${t.icon}</svg>
+        <span class="card-title">${t.title}</span>
+      </div>`;
+  });
 
-  // 13. 九宮格
-  thirds: `
-    <line x1="100" y1="0" x2="100" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <line x1="0" y1="133" x2="300" y2="133" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <line x1="0" y1="266" x2="300" y2="266" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-    <circle cx="100" cy="133" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
-    <circle cx="200" cy="133" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
-    <circle cx="100" cy="266" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>
-    <circle cx="200" cy="266" r="4" fill="none" stroke="#a8e6cf" stroke-width="1.5"/>`
-};
+  html += `
+    <div class="card-item" data-id="none" onclick="applyTemplate('none', this)">
+      <svg class="card-icon" viewBox="0 0 60 70"><circle cx="30" cy="35" r="12" fill="none" stroke="#666" stroke-width="1.5"/><line x1="21" y1="26" x2="39" y2="44" stroke="#666" stroke-width="1.5"/></svg>
+      <span class="card-title">無構圖</span>
+    </div>`;
+
+  container.innerHTML = html;
+
+  // 自動套用該組別嘅第一個構圖模版
+  if (matched.length > 0) {
+    const firstCard = container.querySelector(`.card-item[data-id="${matched[0].id}"]`);
+    applyTemplate(matched[0].id, firstCard);
+  }
+}
+
+function applyTemplate(id, cardEl) {
+  currentGridId = id;
+  document.getElementById('tipWrap').classList.remove('expanded');
+
+  if (id === 'none') {
+    gridOverlay.innerHTML = '';
+    document.getElementById('poseTip').innerText = '已關閉構圖輔助線';
+  } else {
+    const t = TEMPLATES.find(item => item.id === id);
+    if (t) {
+      gridOverlay.innerHTML = t.svg;
+      document.getElementById('poseTip').innerText = t.tip;
+    }
+  }
+
+  const cards = Array.from(document.querySelectorAll('#gridCards .card-item'));
+  cards.forEach(c => c.classList.remove('active'));
+  if (cardEl) {
+    cardEl.classList.add('active');
+    document.getElementById('gridBadge').innerText = Math.max(1, cards.indexOf(cardEl));
+  }
+}
+
+// 切換人數 (1人 / 2人 / 3人 / 4人+ / 景物)
+function setPeopleCount(p) {
+  peopleCount = p;
+  switchTab('grid');
+  renderGridCards();
+}
+
+// 切換前後鏡頭 (一撳前鏡頭即刻鎖定只出「自拍構圖模版」)
+function switchCamera() {
+  if (isAlbumMode) exitAlbumMode();
+  facingMode = (facingMode === 'environment') ? 'user' : 'environment';
+  
+  const btn = document.getElementById('camSwitchBtn');
+  if (facingMode === 'user') {
+    btn.innerText = '返回後鏡';
+    btn.classList.add('cam-front');
+  } else {
+    btn.innerText = '翻轉自拍';
+    btn.classList.remove('cam-front');
+  }
+
+  initCamera();
+  switchTab('grid');
+  renderGridCards();
+}
 
 function toggleTipExpand() {
   document.getElementById('tipWrap').classList.toggle('expanded');
@@ -495,7 +689,6 @@ function setZoomVal(val) {
   } catch (e) {}
 }
 
-// 前鏡頭自動鏡像顯示，自拍更自然
 function updateVideoTransform() {
   const mirror = (facingMode === 'user' && !isAlbumMode) ? -1 : 1;
   video.style.transform = `scale(${currentZoom * mirror}, ${currentZoom})`;
@@ -594,7 +787,7 @@ function clearRefImage() {
   pipThumb.style.display = 'none';
   document.getElementById('refToolbar').style.display = 'none';
   document.getElementById('refSliderRow').classList.remove('show');
-  gridOverlay.innerHTML = grids[currentGridKey];
+  renderGridCards();
 }
 
 function togglePipSize() {
@@ -610,27 +803,6 @@ function switchTab(tab) {
   document.getElementById('sliderRow').classList.toggle('show', !isGrid);
   document.getElementById('tabGrid').classList.toggle('active', isGrid);
   document.getElementById('tabFilter').classList.toggle('active', !isGrid);
-}
-
-function selectGrid(type, tipText, card) {
-  currentGridKey = type;
-  if (selfieGrids.includes(type)) {
-    lastSelfieGridKey = type;
-  } else if (type !== 'none') {
-    lastRearGridKey = type;
-  }
-
-  gridOverlay.innerHTML = grids[type];
-  document.getElementById('poseTip').innerText = tipText;
-  document.getElementById('tipWrap').classList.remove('expanded');
-  
-  const cards = Array.from(document.querySelectorAll('#gridCards .card-item'));
-  cards.forEach(c => c.classList.remove('active'));
-  if (card) {
-    card.classList.add('active');
-    card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    document.getElementById('gridBadge').innerText = cards.indexOf(card);
-  }
 }
 
 function selectFilter(type, card) {
@@ -674,20 +846,6 @@ async function initCamera() {
   }
 }
 
-// 切換前後鏡頭 + 自動切換成自拍構圖或還原後鏡構圖
-function switchCamera() {
-  if (isAlbumMode) exitAlbumMode();
-  facingMode = (facingMode === 'environment') ? 'user' : 'environment';
-  initCamera();
-
-  // 智能切換構圖模版
-  const targetKey = (facingMode === 'user') ? lastSelfieGridKey : lastRearGridKey;
-  const targetCard = document.querySelector(`#gridCards .card-item[data-grid="${targetKey}"]`);
-  if (targetCard) {
-    targetCard.click();
-  }
-}
-
 function loadFromAlbum(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -722,7 +880,6 @@ function capturePhoto() {
   const cropY = (srcH - cropH) / 2;
 
   ctx.save();
-  // 前鏡頭自拍儲存時保持自然鏡像
   if (facingMode === 'user' && !isAlbumMode) {
     ctx.translate(srcW, 0);
     ctx.scale(-1, 1);
@@ -757,7 +914,7 @@ async function saveToiPhoneAlbum() {
   a.click();
 }
 
-gridOverlay.innerHTML = grids.longLeg;
+renderGridCards();
 updateFilterCSS();
 initCamera();
 </script>
